@@ -1,15 +1,15 @@
 source 'https://rubygems.org'
 
-gem 'geminstaller', ">= 0.4.3"
-gem 'fcgi', ">= 0.8.7"
-gem 'i18n', ">= 0.4.1"
-gem 'memcache-client', ">= 1.5.0"
-gem 'mocha', ">= 0.9.8"
-gem 'mysql', ">= 2.8.1"
-gem 'nokogiri', ">= 1.3.3"
-gem 'pg', ">= 0.8.0"
+ruby '1.8.7'
+
+gem 'geminstaller', "~> 0.4.3"
+gem 'i18n', "~> 0.4.1"
+gem 'memcache-client', "~> 1.5.0"
+gem 'mocha', "~> 0.9.8"
+gem 'mysql', "~> 2.8.1"
+gem 'nokogiri', "~> 1.3.3"
+gem 'pg', "~> 0.8.0"
 gem 'rack', "~> 1.1.0"
-gem 'rake', ">= 0.8.1"
-gem 'sqlite-ruby', ">= 2.2.3"
-gem 'sqlite3-ruby', ">= 1.2.5"
-gem 'tzinfo', ">= 0.3.18"
+gem 'rake', "~> 0.8.1"
+gem 'sqlite3', "~> 1.3.7"
+gem 'tzinfo', "~> 0.3.18"
