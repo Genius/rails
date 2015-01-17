@@ -1,0 +1,28 @@
+language: ruby
+sudo: false
+script: 'ci/travis.rb'
+before_script:
+  - bundle update
+cache: bundler
+env:
+  matrix:
+    - "GEM=railties"
+    - "GEM=ap"
+    - "GEM=am,amo,as,av"
+    - "GEM=ar:postgresql"
+rvm:
+  - ree
+matrix:
+  fast_finish: true
+notifications:
+  email: false
+bundler_args: --without test --jobs 3 --retry 3
+services:
+  - memcached
+  - redis
+  - rabbitmq
+addons:
+  postgresql: "9.3"
+before_install:
+  - gem update --system 1.8.25
+  - gem --version
