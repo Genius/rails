@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 ruby '1.8.7'
 
 gem 'geminstaller', "~> 0.4.3"
-gem 'i18n', "~> 0.4.1"
+gem 'i18n', "= 0.6.4"
 gem 'memcache-client', "~> 1.5.0"
 gem 'mocha', "~> 0.9.8"
 gem 'mysql', "~> 2.8.1"
