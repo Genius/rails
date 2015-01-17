@@ -8,7 +8,6 @@ env:
   matrix:
     - "GEM=railties"
     - "GEM=ap"
-    - "GEM=aj"
     - "GEM=am,amo,as,av"
     - "GEM=ar:postgresql"
 rvm:
