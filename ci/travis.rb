@@ -50,7 +50,7 @@ class Build
 
   def tasks
     if activerecord?
-      ['db:mysql:rebuild', "#{adapter}:#{'isolated_' if isolated?}test"]
+      ['test_postgresql']
     else
       ["test", ('isolated' if isolated?), ('integration' if integration?)].compact.join(":")
     end
