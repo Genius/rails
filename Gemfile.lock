@@ -1,0 +1,43 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    ZenTest (3.9.3)
+    coderay (1.0.9)
+    geminstaller (0.4.5)
+    hoe (3.13.0)
+      rake (>= 0.8, < 11.0)
+    i18n (0.6.4)
+    memcache-client (1.5.0)
+      ZenTest (>= 3.4.2)
+      hoe (>= 1.3.0)
+    method_source (0.8.2)
+    mocha (0.9.12)
+    mysql (2.8.1)
+    nokogiri (1.3.3)
+    pg (0.8.0)
+    pry (0.9.10)
+      coderay (~> 1.0.5)
+      method_source (~> 0.8)
+      slop (~> 3.3.1)
+    rack (1.1.6)
+    rake (0.8.7)
+    slop (3.3.3)
+    sqlite3 (1.3.10)
+    tzinfo (0.3.42)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  geminstaller (~> 0.4.3)
+  i18n (= 0.6.4)
+  memcache-client (~> 1.5.0)
+  mocha (~> 0.9.8)
+  mysql (~> 2.8.1)
+  nokogiri (~> 1.3.3)
+  pg (~> 0.8.0)
+  pry (= 0.9.10)
+  rack (~> 1.1.0)
+  rake (~> 0.8.1)
+  sqlite3 (~> 1.3.7)
+  tzinfo (~> 0.3.18)
