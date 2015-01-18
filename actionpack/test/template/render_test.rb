@@ -9,8 +9,8 @@ module RenderTestCases
 
     # Reload and register danish language for testing
     I18n.reload!
-    I18n.backend.store_translations 'da', {}
-    I18n.backend.store_translations 'pt-BR', {}
+    I18n.backend.store_translations 'da', "da" => {}
+    I18n.backend.store_translations 'pt-BR', "pt-BR" => {}
 
     # Ensure original are still the same since we are reindexing view paths
     assert_equal ORIGINAL_LOCALES, I18n.available_locales.map(&:to_s).sort
