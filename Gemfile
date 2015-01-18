@@ -9,6 +9,7 @@ gem 'mocha', "~> 0.9.8"
 gem 'mysql', "~> 2.8.1"
 gem 'nokogiri', "~> 1.3.3"
 gem 'pg', "~> 0.8.0"
+gem 'pry', '= 0.9.10'
 gem 'rack', "~> 1.1.0"
 gem 'rake', "~> 0.8.1"
 gem 'sqlite3', "~> 1.3.7"
