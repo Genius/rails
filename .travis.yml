@@ -11,7 +11,7 @@ env:
     - "GEM=am,amo,as,av"
     - "GEM=ar:postgresql"
 rvm:
-  - ree
+  - 1.9.3
 matrix:
   fast_finish: true
 notifications:
