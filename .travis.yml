@@ -27,5 +27,7 @@ before_install:
   - gem update --system 1.8.15
   - gem --version
   - gem uninstall bundler -a -x
+  - sudo gem uninstall bundler -a -x
   - gem install bundler -v 1.5.2
+  - sudo gem install bundler -v 1.5.2
   - bundle --version
