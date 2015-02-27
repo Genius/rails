@@ -26,5 +26,6 @@ addons:
 before_install:
   - gem update --system 1.8.15
   - gem --version
-  - gem uninstall bundler
+  - gem uninstall bundler -x
   - gem install bundler -v 1.5.2
+  - bundle --version
