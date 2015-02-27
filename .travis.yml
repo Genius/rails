@@ -23,3 +23,8 @@ services:
   - rabbitmq
 addons:
   postgresql: "9.3"
+before_install:
+  - gem update --system 1.8.15
+  - gem --version
+  - gem uninstall bundler
+  - gem install bundler -v 1.5.2
