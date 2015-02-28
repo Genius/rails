@@ -43,8 +43,6 @@ class Build
   def heading
     heading = [gem]
     heading << "with #{adapter}" if activerecord?
-    heading << "in isolation" if isolated?
-    heading << "integration" if integration?
     heading.join(' ')
   end
 
@@ -52,27 +50,18 @@ class Build
     if activerecord?
       ['test_postgresql']
     else
-      ["test", ('isolated' if isolated?), ('integration' if integration?)].compact.join(":")
+      ["test"]
     end
   end
 
   def key
     key = [gem]
     key << adapter if activerecord?
-    key << 'isolated' if isolated?
     key.join(':')
   end
 
   def activerecord?
     gem == 'activerecord'
-  end
-
-  def isolated?
-    options[:isolated]
-  end
-
-  def integration?
-    component.split(':').last == 'integration'
   end
 
   def gem
@@ -97,14 +86,8 @@ end
 results = {}
 
 ENV['GEM'].split(',').each do |gem|
-  [false, true].each do |isolated|
-    next if ENV['TRAVIS_PULL_REQUEST'] && ENV['TRAVIS_PULL_REQUEST'] != 'false' && isolated
-    next if gem == 'railties' && isolated
-
-    build = Build.new(gem, :isolated => isolated)
-    results[build.key] = build.run!
-
-  end
+  build = Build.new(gem)
+  results[build.key] = build.run!
 end
 
 # puts
