@@ -2181,11 +2181,16 @@ module ActiveRecord #:nodoc:
             end
           end
 
+          initial_scoped_methods = self.scoped_methods.dup
           self.scoped_methods << method_scoping
           begin
-            yield
+            begin
+              yield
+            ensure
+              self.scoped_methods.replace(initial_scoped_methods)
+            end
           ensure
-            self.scoped_methods.pop
+            self.scoped_methods.replace(initial_scoped_methods)
           end
         end
 
