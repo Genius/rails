@@ -218,9 +218,11 @@ Bundler.with_clean_env do
     end
 
     def test_gem_determines_build_status
-      assert_equal true,  Rails::GemDependency.new("dummy-gem-a").built?
-      assert_equal true,  Rails::GemDependency.new("dummy-gem-i").built?
-      assert_equal false, Rails::GemDependency.new("dummy-gem-j").built?
+      not_with_bundler do
+        assert_equal true,  Rails::GemDependency.new("dummy-gem-a").built?
+        assert_equal true,  Rails::GemDependency.new("dummy-gem-i").built?
+        assert_equal false, Rails::GemDependency.new("dummy-gem-j").built?
+      end
     end
     
     def test_gem_determines_build_status_only_on_vendor_gems
@@ -233,11 +235,13 @@ Bundler.with_clean_env do
     end
 
     def test_gem_build_passes_options_to_dependencies
-      start_gem = Rails::GemDependency.new("dummy-gem-g")
-      dep_gem = Rails::GemDependency.new("dummy-gem-f")
-      start_gem.stubs(:dependencies).returns([dep_gem])
-      dep_gem.expects(:build).with({ :force => true }).once
-      start_gem.build(:force => true)
+      not_with_bundler do
+        start_gem = Rails::GemDependency.new("dummy-gem-g")
+        dep_gem = Rails::GemDependency.new("dummy-gem-f")
+        start_gem.stubs(:dependencies).returns([dep_gem])
+        dep_gem.expects(:build).with({ :force => true }).once
+        start_gem.build(:force => true)
+      end
     end
 
   end
