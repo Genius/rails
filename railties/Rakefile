@@ -232,7 +232,7 @@ task :copy_app_doc_readme do
 end
 
 def copy_with_rewritten_ruby_path(src_file, dest_file)
-  ruby = File.join(Config::CONFIG['bindir'], Config::CONFIG['ruby_install_name'])
+  ruby = File.join(RbConfig::CONFIG['bindir'], RbConfig::CONFIG['ruby_install_name'])
 
   File.open(dest_file, 'w') do |df|
     File.open(src_file) do |sf|

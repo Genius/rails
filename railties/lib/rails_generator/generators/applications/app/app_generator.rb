@@ -4,7 +4,7 @@ require 'digest/md5'
 require 'active_support/secure_random'
 
 class AppGenerator < Rails::Generator::Base
-  DEFAULT_SHEBANG = File.join(Config::CONFIG['bindir'], Config::CONFIG['ruby_install_name'])
+  DEFAULT_SHEBANG = File.join(RbConfig::CONFIG['bindir'], RbConfig::CONFIG['ruby_install_name'])
 
   DATABASES        = %w( mysql oracle postgresql sqlite2 sqlite3 frontbase ibm_db )
   DEFAULT_DATABASE = 'sqlite3'
