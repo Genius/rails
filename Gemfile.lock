@@ -1,3 +1,8 @@
+PATH
+  remote: ./rails2_ruby2
+  specs:
+    rails2_ruby2 (0.1.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -32,6 +37,7 @@ DEPENDENCIES
   nokogiri (= 1.6.6.2)
   pg (= 0.9.0)
   rack (< 1.5)
+  rails2_ruby2!
   railslts-version (< 3)
   rake (= 10.4.2)
   rdoc (= 2.5.11)

@@ -11,6 +11,7 @@ require 'rails/gem_dependency'
 require 'rails/rack'
 require 'railslts'
 require 'railslts-version'
+require 'rails2_ruby2'
 
 RAILS_ENV = (ENV['RAILS_ENV'] || 'development').dup unless defined?(RAILS_ENV)
 
