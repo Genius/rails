@@ -230,7 +230,7 @@ class InitializerPluginLoadingTests < Test::Unit::TestCase
   def test_all_plugins_are_loaded_when_registered_plugin_list_is_untouched
     failure_tip = "It's likely someone has added a new plugin fixture without updating this list"
     load_plugins!
-    assert_plugins [:a, :acts_as_chunky_bacon, :engine, :gemlike, :plugin_with_no_lib_dir, :stubby], @initializer.loaded_plugins, failure_tip
+    assert_plugins [:a, :acts_as_chunky_bacon, :engine, :gemlike, :plugin_with_no_lib_dir, :rails2_ruby2, :stubby], @initializer.loaded_plugins, failure_tip
   end
 
   def test_all_plugins_loaded_when_all_is_used
@@ -238,7 +238,7 @@ class InitializerPluginLoadingTests < Test::Unit::TestCase
     only_load_the_following_plugins! plugin_names
     load_plugins!
     failure_tip = "It's likely someone has added a new plugin fixture without updating this list"
-    assert_plugins [:stubby, :acts_as_chunky_bacon, :a, :engine, :gemlike, :plugin_with_no_lib_dir], @initializer.loaded_plugins, failure_tip
+    assert_plugins [:stubby, :acts_as_chunky_bacon, :a, :engine, :gemlike, :plugin_with_no_lib_dir, :rails2_ruby2], @initializer.loaded_plugins, failure_tip
   end
 
   def test_all_plugins_loaded_after_all
@@ -246,7 +246,7 @@ class InitializerPluginLoadingTests < Test::Unit::TestCase
     only_load_the_following_plugins! plugin_names
     load_plugins!
     failure_tip = "It's likely someone has added a new plugin fixture without updating this list"
-    assert_plugins [:stubby, :a, :engine, :gemlike, :plugin_with_no_lib_dir, :acts_as_chunky_bacon], @initializer.loaded_plugins, failure_tip
+    assert_plugins [:stubby, :a, :engine, :gemlike, :plugin_with_no_lib_dir, :rails2_ruby2, :acts_as_chunky_bacon], @initializer.loaded_plugins, failure_tip
   end
 
   def test_plugin_names_may_be_strings
