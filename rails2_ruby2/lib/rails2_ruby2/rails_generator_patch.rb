@@ -16,3 +16,7 @@ Rails::Generator::Commands::Create.class_eval do
     end
   end
 end
+
+Rails::Generator::NamedBase.class_eval do
+  public :attributes
+end
