@@ -7,7 +7,7 @@ require 'rbconfig'
 # This uses Config::CONFIG['arch'] from rbconfig.
 
 def require_arch(fname)
-  arch = RbConfig::CONFIG['arch']
+  arch = Config::CONFIG['arch']
   begin
     path = File.join("tmail", arch, fname)
     require path

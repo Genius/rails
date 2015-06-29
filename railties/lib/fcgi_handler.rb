@@ -188,7 +188,7 @@ class RailsFCGIHandler
     end
 
     def restart!
-      config       = ::RbConfig::CONFIG
+      config       = ::Config::CONFIG
       ruby         = File::join(config['bindir'], config['ruby_install_name']) + config['EXEEXT']
       command_line = [ruby, $0, ARGV].flatten.join(' ')
 
