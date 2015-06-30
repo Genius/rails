@@ -13,8 +13,16 @@ env:
 rvm:
   - ree
   - 2.2.2
+gemfile:
+  - Gemfile
+  - gemfiles/Gemfile.ree
 matrix:
   fast_finish: true
+  exclude:
+    - rvm: ree
+      gemfile: Gemfile
+    - rvm: 2.2.2
+      gemfile: gemfiles/Gemfile.ree
 notifications:
   email: false
 bundler_args: --without test --jobs 3 --retry 3
