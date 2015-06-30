@@ -7,6 +7,7 @@ ENV['NO_RELOAD'] = '1'
 $:.unshift File.expand_path('../../lib', __FILE__)
 require 'active_support'
 require 'active_support/test_case'
+require 'rails2_ruby2'
 
 def uses_memcached(test_name)
   require 'memcache'
