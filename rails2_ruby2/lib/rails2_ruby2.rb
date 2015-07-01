@@ -1,5 +1,10 @@
 require "rails2_ruby2/version"
 
+if RUBY_VERSION >= '2.0.0'
+  require 'yaml'
+  require 'syck'
+end
+
 if defined?(ActiveSupport)
   begin
     require 'active_support/version'
