@@ -18,5 +18,16 @@ if defined?(ActiveSupport)
   end
 end
 
+if defined?(ActionController)
+  begin
+    require 'action_pack/version'
+  rescue LoadError
+  else
+    if ActionPack::VERSION::MAJOR == 2 && RUBY_VERSION >= '2.0.0'
+      require 'rails2_ruby2/named_route_collection_patch'
+    end
+  end
+end
+
 module Rails2Ruby2
 end
