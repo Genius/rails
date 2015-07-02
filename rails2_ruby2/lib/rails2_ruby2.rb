@@ -25,6 +25,7 @@ if defined?(ActionController)
   else
     if ActionPack::VERSION::MAJOR == 2 && RUBY_VERSION >= '2.0.0'
       require 'rails2_ruby2/named_route_collection_patch'
+      require 'rails2_ruby2/convert_cookies_patch'
     end
   end
 end
