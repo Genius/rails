@@ -27,9 +27,23 @@ if defined?(ActionController)
       require 'rails2_ruby2/named_route_collection_patch'
       require 'rails2_ruby2/convert_cookies_patch'
       require 'rails2_ruby2/filter_parameters_patch'
+      require 'rails2_ruby2/action_controller_perform_action_patch'
     end
   end
 end
 
 module Rails2Ruby2
+  extend self
+
+  def self.configure_test_unit_task(task)
+    require 'test/unit'
+
+    begin
+      require 'test/unit/version'
+      if Test::Unit::VERSION >= '2.0'
+        task.options = "--collector=object_space"
+      end
+    rescue LoadError
+    end
+  end
 end
