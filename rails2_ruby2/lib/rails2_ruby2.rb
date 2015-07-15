@@ -14,6 +14,7 @@ if defined?(ActiveSupport)
       require 'rails2_ruby2/backport_ruby_config'
       require 'rails2_ruby2/i18n_patch'
       require 'rails2_ruby2/slice_patch'
+      require 'rails2_ruby2/tzinfo_patch'
     end
   end
 end
