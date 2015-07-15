@@ -204,7 +204,8 @@ class SanitizerTest < ActionController::TestCase
 
   # fucked
   def test_should_sanitize_attributes
-    assert_sanitized %(<SPAN title="'><script>alert()</script>">blah</SPAN>), %(<span title="'&gt;&lt;script&gt;alert()&lt;/script&gt;">blah</span>)
+    escaped_single_quote = CGI.escapeHTML("'")
+    assert_sanitized %(<SPAN title="'><script>alert()</script>">blah</SPAN>), %(<span title="#{escaped_single_quote}&gt;&lt;script&gt;alert()&lt;/script&gt;">blah</span>)
   end
 
   def test_should_sanitize_illegal_style_properties
