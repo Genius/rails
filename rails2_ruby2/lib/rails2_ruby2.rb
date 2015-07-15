@@ -1,36 +1,24 @@
 require "rails2_ruby2/version"
+require "rails2_ruby2/kernel_helpers"
 
-if RUBY_VERSION >= '2.0.0'
+in_ruby2 do
   require 'yaml'
   require 'syck'
 end
 
-if defined?(ActiveSupport)
-  begin
-    require 'active_support/version'
-  rescue LoadError
-  else
-    if ActiveSupport::VERSION::MAJOR == 2 && RUBY_VERSION >= '2.0.0'
-      require 'rails2_ruby2/backport_ruby_config'
-      require 'rails2_ruby2/i18n_patch'
-      require 'rails2_ruby2/slice_patch'
-      require 'rails2_ruby2/tzinfo_patch'
-    end
-  end
+in_ruby2_when_library_loaded('ActiveSupport', :version_file => 'active_support/version') do
+  require 'rails2_ruby2/backport_ruby_config'
+  require 'rails2_ruby2/i18n_patch'
+  require 'rails2_ruby2/slice_patch'
+  require 'rails2_ruby2/tzinfo_patch'
 end
 
-if defined?(ActionController)
-  begin
-    require 'action_pack/version'
-  rescue LoadError
-  else
-    if ActionPack::VERSION::MAJOR == 2 && RUBY_VERSION >= '2.0.0'
-      require 'rails2_ruby2/named_route_collection_patch'
-      require 'rails2_ruby2/convert_cookies_patch'
-      require 'rails2_ruby2/filter_parameters_patch'
-      require 'rails2_ruby2/action_controller_perform_action_patch'
-    end
-  end
+in_ruby2_when_library_loaded('ActionController',
+   :lib_const_string => 'ActionPack', :version_file => 'action_pack/version') do
+  require 'rails2_ruby2/named_route_collection_patch'
+  require 'rails2_ruby2/convert_cookies_patch'
+  require 'rails2_ruby2/filter_parameters_patch'
+  require 'rails2_ruby2/action_controller_perform_action_patch'
 end
 
 module Rails2Ruby2
