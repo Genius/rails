@@ -8,6 +8,7 @@ $:.unshift File.expand_path('../../lib', __FILE__)
 require 'active_support'
 require 'active_support/test_case'
 require 'rails2_ruby2'
+require 'rails2_ruby2/rails_init'
 
 def uses_memcached(test_name)
   require 'memcache'

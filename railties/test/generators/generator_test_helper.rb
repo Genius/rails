@@ -57,6 +57,7 @@ module Rails
 end
 
 require 'rails_generator'
+require 'rails2_ruby2'
 require 'rails2_ruby2/rails_init'
 
 class GeneratorTestCase < Test::Unit::TestCase
