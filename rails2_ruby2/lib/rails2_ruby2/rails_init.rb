@@ -5,6 +5,7 @@ end
 in_ruby2_when_library_loaded('ActiveRecord', :version_file => 'active_record/version') do
   require 'rails2_ruby2/active_record_associations'
   require 'rails2_ruby2/active_record_base'
+  require 'rails2_ruby2/downcase_patch'
 end
 
 in_ruby2_when_library_loaded('ActiveSupport', :version_file => 'active_support/version') do
