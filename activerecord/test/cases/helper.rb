@@ -14,6 +14,8 @@ require 'active_record/fixtures'
 require 'connection'
 
 require 'cases/repair_helper'
+require 'rails2_ruby2'
+require 'rails2_ruby2/rails_init'
 
 # Show backtraces for deprecated behavior for quicker cleanup.
 ActiveSupport::Deprecation.debug = true
