@@ -10,7 +10,7 @@ class ActiveRecord::Base
       if k.to_s.include?("(")
         multiparameter_attributes << [ k, v ]
       else
-        respond_to?(:"#{k}=", true) ? send(:"#{k}=", v) : raise(UnknownAttributeError, "unknown attribute: #{k}")
+        respond_to?(:"#{k}=") || protected_methods.include?(:"#{k}=") ? send(:"#{k}=", v) : raise(ActiveRecord::UnknownAttributeError, "unknown attribute: #{k}")
       end
     end
 
