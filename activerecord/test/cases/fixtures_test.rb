@@ -151,7 +151,7 @@ class FixturesTest < ActiveRecord::TestCase
   end
 
   def test_dirty_dirty_yaml_file
-    assert_raise(Fixture::FormatError) do
+    assert_raise(::Fixture::FormatError) do
       Fixtures.new( Account.connection, "courses", 'Course', FIXTURES_ROOT + "/naked/yml/courses")
     end
   end
