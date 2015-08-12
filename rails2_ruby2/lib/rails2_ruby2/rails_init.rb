@@ -2,7 +2,7 @@ in_ruby2_when_library_loaded('Rails') do
   require 'rails2_ruby2/rails_generator_patch'
 end
 
-in_ruby2_when_library_loaded('ActiveRecord') do
+in_ruby2_when_library_loaded('ActiveRecord', :version_file => 'active_record/version') do
   require 'rails2_ruby2/active_record_associations'
 end
 
