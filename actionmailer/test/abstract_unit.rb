@@ -6,6 +6,8 @@ $:.unshift File.expand_path('../../../activesupport/lib', __FILE__)
 $:.unshift File.expand_path('../../../actionpack/lib', __FILE__)
 require 'action_mailer'
 require 'action_mailer/test_case'
+require 'rails2_ruby2'
+require 'rails2_ruby2/rails_init'
 
 # Show backtraces for deprecated behavior for quicker cleanup.
 ActiveSupport::Deprecation.debug = true
