@@ -10,6 +10,8 @@ class I18nTest < Test::Unit::TestCase
     Time.zone_default = ActiveSupport::TimeZone['Eastern Time (US & Canada)']
     Time.zone.stubs(:now).returns Time.local(2000)
     assert_equal Time.zone.now.strftime("%a, %d %b %Y %H:%M:%S %z"), I18n.localize(Time.zone.now)
+  ensure
+    Time.zone_default = nil
   end
   
   def test_date_localization_should_use_default_format
