@@ -12,6 +12,7 @@ in_ruby2_when_library_loaded('ActiveSupport', :version_file => 'active_support/v
   require 'rails2_ruby2/i18n_patch'
   require 'rails2_ruby2/slice_patch'
   require 'rails2_ruby2/tzinfo_patch'
+  require 'rails2_ruby2/time_zone_patch'
   require 'rails2_ruby2/compressed_memcached_store_patch'
   require 'rails2_ruby2/nokogirisax_patch'
 end
