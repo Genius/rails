@@ -13,12 +13,15 @@ RELEASE_NAME  = "REL #{PKG_VERSION}"
 RUBY_FORGE_PROJECT = "activesupport"
 RUBY_FORGE_USER    = "webster132"
 
+require 'rails2_ruby2'
+
 task :default => :test
 Rake::TestTask.new { |t| 
   t.libs << "test"
   t.pattern = 'test/**/*_test.rb'
   t.verbose = true
   t.warning = true
+  Rails2Ruby2.configure_test_unit_task(t)
 }
 
 # Create compressed packages
