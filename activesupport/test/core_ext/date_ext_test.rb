@@ -252,6 +252,7 @@ class DateExtCalculationsTest < ActiveSupport::TestCase
     Time.zone_default = ActiveSupport::TimeZone['Eastern Time (US & Canada)']
     with_env_tz 'US/Central' do
       Time.stubs(:now).returns Time.local(1999, 12, 31, 23)
+      Date.stubs(:today).returns Time.now.to_date
       assert_equal Date.new(1999, 12, 31), Date.today
       assert_equal Date.new(2000, 1, 1), Date.current
     end
