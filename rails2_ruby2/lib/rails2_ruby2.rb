@@ -4,6 +4,7 @@ require "rails2_ruby2/kernel_helpers"
 in_ruby2 do
   require 'yaml'
   require 'syck'
+  require 'rails2_ruby2/deserialize_ordered_hashes'
   require 'rails2_ruby2/backport_ruby_config'
 end
 
