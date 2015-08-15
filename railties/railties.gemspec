@@ -14,7 +14,6 @@ Gem::Specification.new do |s|
   s.rdoc_options = ['--exclude', '.']
 
   s.add_dependency 'rake',           '>= 0.8.3'
-  s.add_dependency 'rails2_ruby2',   '> 0', :path => './rails2_ruby2'
   s.add_dependency 'activesupport',  '= 2.3.18'
   s.add_dependency 'activerecord',   '= 2.3.18'
   s.add_dependency 'actionpack',     '= 2.3.18'
