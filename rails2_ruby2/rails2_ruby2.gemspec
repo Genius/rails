@@ -29,5 +29,6 @@ Gem::Specification.new do |spec|
   if RUBY_VERSION >= '2.0'
     spec.add_dependency "syck", "~> 1.0.5"
     spec.add_dependency 'iconv'
+    spec.add_dependency 'test-unit'
   end
 end
