@@ -12,7 +12,7 @@ gem 'nokogiri', '1.6.6.2'
 gem 'libxml-ruby', '=2.8.0'
 gem 'test-unit'
 gem 'iconv'
-gem 'rails2_ruby2', path: './rails2_ruby2'
+gem 'rails2_ruby2', :github => 'Genius/rails2_ruby2'
 
 # This is for running tests only. Update via "bundle update rails-version".
 gem 'railslts-version', '<3'

@@ -1,7 +1,9 @@
-PATH
-  remote: ./rails2_ruby2
+GIT
+  remote: git://github.com/Genius/rails2_ruby2.git
+  revision: c2086e838c3a5bc43973fa0774cd31c0222d0cad
   specs:
     rails2_ruby2 (0.1.0)
+      iconv
       syck (~> 1.0.5)
       test-unit (= 1.2.3)
 
