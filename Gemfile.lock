@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/Genius/rails2_ruby2.git
-  revision: c2086e838c3a5bc43973fa0774cd31c0222d0cad
+  revision: b246c7756012db10489c9d531a766715214c4bb6
   specs:
     rails2_ruby2 (0.1.0)
       iconv

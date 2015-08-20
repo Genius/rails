@@ -13,7 +13,10 @@ RELEASE_NAME  = "REL #{PKG_VERSION}"
 RUBY_FORGE_PROJECT = "activesupport"
 RUBY_FORGE_USER    = "webster132"
 
-require 'rails2_ruby2'
+begin
+  require 'rails2_ruby2'
+rescue LoadError
+end
 
 task :default => :test
 Rake::TestTask.new { |t| 

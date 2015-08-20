@@ -1,9 +1,3 @@
-GIT
-  remote: git://github.com/Genius/rails2_ruby2.git
-  revision: c2086e838c3a5bc43973fa0774cd31c0222d0cad
-  specs:
-    rails2_ruby2 (0.1.0)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -31,7 +25,6 @@ DEPENDENCIES
   nokogiri (= 1.3.3)
   pg (= 0.9.0)
   rack (< 1.5)
-  rails2_ruby2!
   railslts-version (< 3)
   rake (= 0.8.7)
   rdoc (= 2.5.11)

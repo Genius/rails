@@ -4,7 +4,11 @@ require 'rake/testtask'
 require 'rake/packagetask'
 require RAKEVERSION == '0.8.0' ? 'rake/gempackagetask' : 'rubygems/package_task'
 require File.join(File.dirname(__FILE__), 'lib', 'action_pack', 'version')
-require 'rails2_ruby2'
+
+begin
+  require 'rails2_ruby2'
+rescue LoadError
+end
 
 PKG_BUILD     = ENV['PKG_BUILD'] ? '.' + ENV['PKG_BUILD'] : ''
 PKG_NAME      = 'actionpack'
