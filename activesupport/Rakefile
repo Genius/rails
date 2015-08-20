@@ -21,7 +21,6 @@ Rake::TestTask.new { |t|
   t.pattern = 'test/**/*_test.rb'
   t.verbose = true
   t.warning = true
-  Rails2Ruby2.configure_test_unit_task(t)
 }
 
 # Create compressed packages
