@@ -82,9 +82,14 @@ module ActionView
 
     private
       def compute_backtrace
+        backtrace = clean_backtrace
+        if defined?(::Forwardable::FILE_REGEXP)
+          # remove these lines, because otherwise Forwardable will nuke our complete backtrace later
+          backtrace.reject! { |line| line =~ ::Forwardable::FILE_REGEXP }
+        end
         [
           "#{source_location.capitalize}\n\n#{source_extract(4)}\n    " +
-          clean_backtrace.join("\n    ")
+          backtrace.join("\n    ")
         ]
       end
 

@@ -46,7 +46,8 @@ module ActiveRecord
     # is computed directly through SQL and does not trigger by itself the
     # instantiation of the actual post records.
     class AssociationProxy #:nodoc:
-      alias_method :proxy_respond_to?, :respond_to?
+      alias_method :proxy_original_respond_to?, :respond_to?
+      alias_method :proxy_protected_methods, :protected_methods
       alias_method :proxy_extend, :extend
       delegate :to_param, :to => :proxy_target
       instance_methods.each { |m| undef_method m unless m =~ /(^__|^nil\?$|^send$|proxy_|^object_id$)/ }
@@ -56,6 +57,10 @@ module ActiveRecord
         reflection.check_validity!
         Array(reflection.options[:extend]).each { |ext| proxy_extend(ext) }
         reset
+      end
+
+      def proxy_respond_to?(method, include_private = false)
+        proxy_original_respond_to?(method, include_private) || proxy_protected_methods.include?(method.to_sym)
       end
 
       # Returns the owner of the proxy.
@@ -211,7 +216,7 @@ module ActiveRecord
         # Forwards any missing method call to the \target.
         def method_missing(method, *args, &block)
           if load_target
-            if @target.respond_to?(method)
+            if ActiveSupport.legacy_respond_to?(@target, method)
               @target.send(method, *args, &block)
             else
               super

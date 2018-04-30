@@ -1,6 +1,5 @@
 # encoding: utf-8
 require 'singleton'
-require 'iconv'
 require 'kconv'
 
 module ActiveSupport
@@ -275,26 +274,40 @@ module ActiveSupport
     end
 
 
-    # Replaces accented characters with their ascii equivalents.
-    def transliterate(string)
-      Iconv.iconv('ascii//ignore//translit', 'utf-8', string).to_s
-    end
+    # Ruby 2 no longer has iconv as part of the standard library, so use internal encoding handling
+    if ActiveSupport.modern_ruby?
 
-    if RUBY_VERSION >= '1.9'
-      undef_method :transliterate
+      def transliterate(string)
+        string.unicode_normalize(:nfkd). # Decompose accented characters
+          gsub(/[^\x00-\x7F]+/, '')     # Remove anything non-ASCII entirely (e.g. diacritics).
+      end
+
+    elsif RUBY_VERSION >= '1.9'
+
       def transliterate(string)
         warn "Ruby 1.9 doesn't support Unicode normalization yet"
         string.dup
       end
 
-    # The iconv transliteration code doesn't function correctly
-    # on some platforms, but it's very fast where it does function.
-    elsif "foo" != (Inflector.transliterate("föö") rescue nil)
-      undef_method :transliterate
+    else
+
+      require 'iconv'
+
+      # Replaces accented characters with their ascii equivalents.
       def transliterate(string)
-        string.mb_chars.normalize(:kd). # Decompose accented characters
-          gsub(/[^\x00-\x7F]+/, '')     # Remove anything non-ASCII entirely (e.g. diacritics).
+        Iconv.iconv('ascii//ignore//translit', 'utf-8', string).to_s
       end
+
+      # The iconv transliteration code doesn't function correctly
+      # on some platforms, but it's very fast where it does function.
+      if "foo" != (Inflector.transliterate("föö") rescue nil)
+        undef_method :transliterate
+        def transliterate(string)
+          string.mb_chars.normalize(:kd). # Decompose accented characters
+            gsub(/[^\x00-\x7F]+/, '')     # Remove anything non-ASCII entirely (e.g. diacritics).
+        end
+      end
+
     end
 
     # Create the name of a table like Rails does for models to table names. This method

@@ -111,6 +111,27 @@ class TestNestedAttributesInGeneral < ActiveRecord::TestCase
     pirate.ship_attributes = { :name => 'Hello Pearl' }
     assert_difference('Ship.count') { pirate.save! }
   end
+
+  # This test is all we can do for Rails 2.3 in regard to
+  # [CVE-2015-7577] Nested attributes rejection proc bypass in Active Record.
+  #
+  # In Rails 3+ you could skip over a :reject_if proc when the nested association
+  # had :allow_destroy => false and you're updating an existing record with :_destroy => 1.
+  # This might be used to change a record that the developer considers to be off limits
+  # due to the :reject_if condition.
+  #
+  # However, the Rails 2.3 API defines that :reject_if is never called for existing records,
+  # only for new records. Hence the developer cannot trust in any protection from :reject_if
+  # for existing record.
+  #
+  # The only (slightly awkward) test we can write for Rails 2.3 is that new records with
+  # :_destroy => true are immediately destroyed, even if :allow_destroy is false.
+  def test_reject_if_is_not_short_circuited_if_allow_destroy_is_false
+    Pirate.accepts_nested_attributes_for :ship, :reject_if => proc { |a| a[:name] == "The Golden Hind" }, :allow_destroy => false
+    pirate = Pirate.new(:catchphrase => "Arrr", :ship_attributes => { :name => "The Golden Hind", :_destroy => "1"})
+    assert_no_difference('Ship.count') { pirate.save! }
+  end
+
 end
 
 class TestNestedAttributesOnAHasOneAssociation < ActiveRecord::TestCase

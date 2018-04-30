@@ -85,7 +85,15 @@ class TagHelperTest < ActionView::TestCase
       assert_equal %(<a href="#{escaped}" />), tag('a', :href => escaped)
     end
   end
-  
+
+  def test_tag_does_not_honor_double_quotes_as_attributes_with_disabled_escaping
+    assert_equal '<a title="&quot;" />', tag('a', { :title => '"' }, false, false)
+  end
+
+  def test_content_tag_does_not_honor_double_quotes_as_attributes_with_disabled_escaping
+    assert_equal '<p title="&quot;">content</p>', content_tag('p', "content", { :title => '"' }, false)
+  end
+
   def test_skip_invalid_escaped_attributes
     ['&1;', '&#1dfa3;', '& #123;'].each do |escaped|
       assert_equal %(<a href="#{escaped.gsub /&/, '&amp;'}" />), tag('a', :href => escaped)

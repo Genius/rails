@@ -27,7 +27,6 @@ class QuotingTest < Test::Unit::TestCase
     actual = TMail::Unquoter.unquote_and_convert_to(quoted, 'utf-8')
 
     expected = "Re: [12] #137: Inkonsistente verwendung von \"Hinzuf\303\274gen\""
-    expected.force_encoding 'ASCII-8BIT' if expected.respond_to?(:force_encoding)
 
     assert_equal expected, actual
   end
@@ -46,9 +45,16 @@ class QuotingTest < Test::Unit::TestCase
     assert_equal expected, b
   end
 
+  def test_unquote_ignores_string_encoding
+    a ="Brosch\xFCre"
+    a.force_encoding 'ascii-8bit' if a.respond_to?(:force_encoding)
+    b = TMail::Unquoter.convert_to(a, 'utf-8', 'iso-8859-1')
+    expected = "Brosch\303\274re"
+    assert_equal expected, b
+  end
+
   def test_quote_multibyte_chars
     original = "\303\246 \303\270 and \303\245"
-    original.force_encoding('ASCII-8BIT') if original.respond_to?(:force_encoding)
 
     result = execute_in_sandbox(<<-CODE)
       $:.unshift(File.dirname(__FILE__) + "/../lib/")
@@ -76,7 +82,6 @@ class QuotingTest < Test::Unit::TestCase
   def test_email_with_partially_quoted_subject
     mail = TMail::Mail.parse(IO.read("#{File.dirname(__FILE__)}/fixtures/raw_email_with_partially_quoted_subject"))
     expected = "Re: Test: \"\346\274\242\345\255\227\" mid \"\346\274\242\345\255\227\" tail"
-    expected.force_encoding('ASCII-8BIT') if expected.respond_to?(:force_encoding)
     assert_equal expected, mail.subject
   end
 

@@ -1,21 +1,21 @@
 require 'abstract_unit'
 
-class A
-end
-
-module X
-  class B
+class ClassTest < Test::Unit::TestCase
+  class A
   end
-end
 
-module Y
-  module Z
-    class C
+  module X
+    class B
     end
   end
-end
 
-class ClassTest < Test::Unit::TestCase
+  module Y
+    module Z
+      class C
+      end
+    end
+  end
+
   def test_removing_class_in_root_namespace
     assert A.is_a?(Class)
     Class.remove_class(A)

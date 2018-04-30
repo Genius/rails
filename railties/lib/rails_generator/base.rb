@@ -157,21 +157,20 @@ module Rails
       def after_generate
       end
 
-      protected
-        # Convenience method for generator subclasses to record a manifest.
-        def record
-          Rails::Generator::Manifest.new(self) { |m| yield m }
-        end
+      # Convenience method for generator subclasses to record a manifest.
+      def record
+        Rails::Generator::Manifest.new(self) { |m| yield m }
+      end
 
-        # Override with your own usage banner.
-        def banner
-          "Usage: #{$0} #{spec.name} [options]"
-        end
+      # Override with your own usage banner.
+      def banner
+        "Usage: #{$0} #{spec.name} [options]"
+      end
 
-        # Read USAGE from file in generator base path.
-        def usage_message
-          File.read(File.join(spec.path, 'USAGE')) rescue ''
-        end
+      # Read USAGE from file in generator base path.
+      def usage_message
+        File.read(File.join(spec.path, 'USAGE')) rescue ''
+      end
     end
 
 
@@ -214,17 +213,16 @@ module Rails
         assign_names!(base_name)
       end
 
-      protected
-        # Override with your own usage banner.
-        def banner
-          "Usage: #{$0} #{spec.name} #{spec.name.camelize}Name [options]"
+      # Override with your own usage banner.
+      def banner
+        "Usage: #{$0} #{spec.name} #{spec.name.camelize}Name [options]"
+      end
+  
+      def attributes
+        @attributes ||= @args.collect do |attribute|
+          Rails::Generator::GeneratedAttribute.new(*attribute.split(":"))
         end
-    
-        def attributes
-          @attributes ||= @args.collect do |attribute|
-            Rails::Generator::GeneratedAttribute.new(*attribute.split(":"))
-          end
-        end
+      end
 
 
       private

@@ -1,10 +1,8 @@
 Rails LTS 2.3
 =============
 
-Rails LTS 2.3 is a maintained release of Rails 2.3.18 that includes additional security fixes. See [https://railslts.com/](https://railslts.com) for more information.
-
-This is the public repository for the "Community Edition". It receives security patches with a 10 day delay.
-
+Rails LTS 2.3 is a maintained release of Rails 2.3 that includes additional security fixes.
+See [https://railslts.com/](https://railslts.com) for more information.
 
 
 Pull Requests

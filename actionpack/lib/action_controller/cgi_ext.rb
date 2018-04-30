@@ -9,7 +9,8 @@ class CGI #:nodoc:
     alias :escapeHTML_fail_on_nil :escapeHTML
 
     def escapeHTML(string)
-      escapeHTML_fail_on_nil(string) unless string.nil?
+      # escapeHTML does not escape single quotes on Ruby 1.8.7
+      escapeHTML_fail_on_nil(string).gsub("'", '&#39;') unless string.nil?
     end
   end
 end

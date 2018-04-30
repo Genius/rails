@@ -1,4 +1,5 @@
 require 'tzinfo'
+require 'yaml'
 
 module ActiveSupport
   # A Time-like class that can represent a time in any time zone. Necessary because standard Ruby Time instances are
@@ -60,6 +61,7 @@ module ActiveSupport
 
     # Returns the simultaneous time in <tt>Time.zone</tt>, or the specified zone.
     def in_time_zone(new_zone = ::Time.zone)
+      new_zone = ActiveSupport::TimeZone[new_zone] if new_zone.is_a?(String)
       return self if time_zone == new_zone
       utc.in_time_zone(new_zone)
     end
@@ -129,11 +131,18 @@ module ActiveSupport
       end
     end
 
-    def to_yaml(options = {})
-      if options.kind_of?(YAML::Emitter)
-        utc.to_yaml(options)
-      else
-        time.to_yaml(options).gsub('Z', formatted_offset(true, 'Z'))
+    if ActiveSupport.psych?
+      def encode_with(coder) #:nodoc:
+        coder.tag = nil
+        coder.scalar = time.strftime("%Y-%m-%d %H:%M:%S.%9N #{formatted_offset(true, 'Z')}")
+      end
+    else
+      def to_yaml(options = {})
+        if options.kind_of?(YAML::Emitter)
+          utc.to_yaml(options)
+        else
+          time.to_yaml(options).gsub('Z', formatted_offset(true, 'Z'))
+        end
       end
     end
 

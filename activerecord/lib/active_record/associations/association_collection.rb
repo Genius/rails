@@ -339,7 +339,7 @@ module ActiveRecord
       end
 
       def proxy_respond_to?(method, include_private = false)
-        super || @reflection.klass.respond_to?(method, include_private)
+        super || ActiveSupport.legacy_respond_to?(@reflection.klass, method, include_private)
       end
 
       protected

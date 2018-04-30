@@ -196,12 +196,14 @@ class OrderedHashTest < Test::Unit::TestCase
   end
 
   def test_alternate_initialization_with_array
-    alternate = ActiveSupport::OrderedHash[ [
-      [1, 2],
-      [3, 4],
-      "bad key value pair",
-      [ 'missing value' ]
-    ]]
+    alternate = silence_warnings do
+      ActiveSupport::OrderedHash[ [
+        [1, 2],
+        [3, 4],
+        "bad key value pair",
+        [ 'missing value' ]
+      ]]
+    end
 
     assert_kind_of ActiveSupport::OrderedHash, alternate
     assert_equal [1, 3, 'missing value'], alternate.keys
@@ -223,6 +225,10 @@ class OrderedHashTest < Test::Unit::TestCase
     original = @ordered_hash.replace(@other_ordered_hash)
     assert_same original, @ordered_hash
     assert_equal @other_ordered_hash.keys, @ordered_hash.keys
+  end
+
+  def test_type_after_yaml_deserialization
+    assert_equal ActiveSupport::OrderedHash, YAML::load(YAML::dump(@ordered_hash)).class
   end
 
   def test_each_after_yaml_serialization

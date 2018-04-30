@@ -40,7 +40,17 @@ module ActionView #:nodoc:
       each(&:load!)
     end
 
+    def find_template_in_view_path(original_template_path, format = nil, html_fallback = true)
+      _find_template(original_template_path, format, html_fallback, false)
+    end
+
     def find_template(original_template_path, format = nil, html_fallback = true)
+      _find_template(original_template_path, format, html_fallback, true)
+    end
+
+    private
+
+    def _find_template(original_template_path, format, html_fallback, allow_outside_view_path)
       return original_template_path if original_template_path.respond_to?(:render)
       template_path = original_template_path.sub(/^\//, '')
 
@@ -69,7 +79,11 @@ module ActionView #:nodoc:
         end
       end
 
-      return Template.new(original_template_path) if File.file?(original_template_path)
+      if File.file?(original_template_path)
+        if allow_outside_view_path || any? { |load_path| original_template_path.start_with?(File.expand_path(load_path)) }
+          return Template.new(original_template_path)
+        end
+      end
 
       raise MissingTemplate.new(self, original_template_path, format)
     end

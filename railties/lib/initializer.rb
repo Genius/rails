@@ -2,6 +2,24 @@ require 'logger'
 require 'set'
 require 'pathname'
 
+module Rails
+  class << self
+    if defined?(LTS_ENABLE_GEM_HANDLING)
+      def enable_gem_handling?
+        LTS_ENABLE_GEM_HANDLING
+      end
+    elsif defined?(Gem::VERSION) && Gem::VERSION >= '2'
+      def enable_gem_handling?
+        false
+      end
+    else
+      def enable_gem_handling?
+        true
+      end
+    end
+  end
+end
+
 $LOAD_PATH.unshift File.dirname(__FILE__)
 require 'railties_path'
 require 'rails/version'
@@ -10,7 +28,6 @@ require 'rails/plugin/loader'
 require 'rails/gem_dependency'
 require 'rails/rack'
 require 'railslts'
-require 'railslts-version'
 
 RAILS_ENV = (ENV['RAILS_ENV'] || 'development').dup unless defined?(RAILS_ENV)
 
@@ -135,6 +152,7 @@ module Rails
       add_gem_load_paths
 
       require_frameworks
+      require_lts_version
       set_autoload_paths
       add_plugin_load_paths
       load_environment
@@ -274,6 +292,17 @@ module Rails
     rescue LoadError => e
       # Re-raise as RuntimeError because Mongrel would swallow LoadError.
       raise e.to_s
+    end
+
+    # Require lts-version, so RailsLTS::VERSION is available.
+    # Needs to happen late, so load paths are properly set up when using frozen gems.
+    def require_lts_version
+      version_load_path = configuration.railslts_version_path
+      if version_load_path
+        $LOAD_PATH << version_load_path
+        $LOAD_PATH.uniq!
+      end
+      require 'railslts-version'
     end
 
     # Preload all frameworks specified by the Configuration#frameworks.
@@ -846,7 +875,11 @@ Run `rake gems:install` to install the missing gems.
     #
     #   config.gem 'qrp', :version => '0.4.1', :lib => false
     def gem(name, options = {})
-      @gems << Rails::GemDependency.new(name, options)
+      if Rails.enable_gem_handling?
+        @gems << Rails::GemDependency.new(name, options)
+      else
+        raise 'config.gem is not supported for RubyGems >= 2. Please downgrade to RubyGems 1.x, or use bundler with a Gemfile.'
+      end
     end
 
     # Deprecated options:
@@ -997,6 +1030,11 @@ Run `rake gems:install` to install the missing gems.
       end
 
       paths.map { |dir| "#{framework_root_path}/#{dir}" }.select { |dir| File.directory?(dir) }
+    end
+
+    def railslts_version_path
+      dir = "#{framework_root_path}/railslts-version/lib"
+      dir if File.directory?(dir)
     end
 
     private

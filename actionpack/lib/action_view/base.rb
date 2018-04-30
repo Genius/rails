@@ -256,12 +256,17 @@ module ActionView #:nodoc:
       local_assigns ||= {}
 
       case options
+      when ActionController::ParamsHashWithIndifferentAccess
+        raise ArgumentError, "passing params directly to render is not permitted"
       when Hash
         options = options.reverse_merge(:locals => {})
         if options[:layout]
           _render_with_layout(options, local_assigns, &block)
         elsif options[:file]
           template = self.view_paths.find_template(options[:file], template_format)
+          template.render_template(self, options[:locals])
+        elsif options[:file_in_view_path]
+          template = self.view_paths.find_template_in_view_path(options[:file_in_view_path], template_format)
           template.render_template(self, options[:locals])
         elsif options[:partial]
           render_partial(options)
@@ -347,7 +352,7 @@ module ActionView #:nodoc:
             original_content_for_layout = @content_for_layout if defined?(@content_for_layout)
             @content_for_layout = render(options)
 
-            if (options[:inline] || options[:file] || options[:text])
+            if (options[:inline] || options[:file] || options[:file_in_view_path] || options[:text])
               @cached_content_for_layout = @content_for_layout
               render(:file => partial_layout, :locals => local_assigns)
             else

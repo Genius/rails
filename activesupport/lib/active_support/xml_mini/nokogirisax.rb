@@ -33,7 +33,15 @@ module ActiveSupport
 
       def start_element(name, attrs = [])
         new_hash = { CONTENT_KEY => '' }
-        new_hash[attrs.shift] = attrs.shift while attrs.length > 0
+        if attrs.first && attrs.first.is_a?(Array)
+          # newer Nokogiri
+          attrs.each do |key, value|
+            new_hash[key] = value
+          end
+        else
+          # old Nokogiri
+          new_hash[attrs.shift] = attrs.shift while attrs.length > 0
+        end
         new_hash[HASH_SIZE_KEY] = new_hash.size + 1
 
         case current_hash[name]

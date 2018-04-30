@@ -1958,7 +1958,7 @@ class BasicsTest < ActiveRecord::TestCase
     assert_equal written_on_in_current_timezone, xml.elements["//written-on"].text
     assert_equal "datetime" , xml.elements["//written-on"].attributes['type']
 
-    assert_equal "--- Have a nice day\n" , xml.elements["//content"].text
+    assert_equal "--- Have a nice day\n" , xml.elements["//content"].text.sub("...\n", '')
     assert_equal "yaml" , xml.elements["//content"].attributes['type']
 
     assert_equal "david@loudthinking.com", xml.elements["//author-email-address"].text

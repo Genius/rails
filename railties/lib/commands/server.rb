@@ -103,7 +103,13 @@ app = Rack::Builder.new {
 
 puts "=> Call with -d to detach"
 
-trap(:INT) { exit }
+trap(:INT) do
+  if server.respond_to?(:shutdown)
+    server.shutdown
+  else
+    exit
+  end
+end
 
 puts "=> Ctrl-C to shutdown server"
 

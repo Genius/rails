@@ -1,7 +1,29 @@
 require 'yaml'
 
-YAML.add_builtin_type("omap") do |type, val|
-  ActiveSupport::OrderedHash[val.map(&:to_a).map(&:first)]
+if ActiveSupport.psych?
+  # OrderedHash used to serialized as
+  # !omap
+  #   foo: bar
+  # But using Syck could also be parsed as
+  # !!omap
+  #   foo: bar
+  #
+  # We replicate this behaviour.
+
+  # parses !!omap
+  YAML.add_builtin_type("omap") do |type, val|
+    ActiveSupport::OrderedHash[val.to_a]
+  end
+
+  # parses !omap
+  YAML.add_domain_type("!", "omap") do |type, val|
+    ActiveSupport::OrderedHash[val.to_a]
+  end
+else
+  # parses !omap
+  YAML.add_builtin_type("omap") do |type, val|
+    ActiveSupport::OrderedHash[val.map(&:to_a).map(&:first)]
+  end
 end
 
 # OrderedHash is namespaced to prevent conflicts with other implementations
@@ -11,11 +33,17 @@ module ActiveSupport
       "!tag:yaml.org,2002:omap"
     end
 
-    def to_yaml(opts = {})
-      YAML.quick_emit(self, opts) do |out|
-        out.seq(taguri, to_yaml_style) do |seq|
-          each do |k, v|
-            seq.add(k => v)
+    if ActiveSupport.psych?
+      def encode_with(coder)
+        coder.represent_seq "!omap", map { |k, v| { k => v } }
+      end
+    else
+      def to_yaml(opts = {})
+        YAML.quick_emit(self, opts) do |out|
+          out.seq(taguri, to_yaml_style) do |seq|
+            each do |k, v|
+              seq.add(k => v)
+            end
           end
         end
       end

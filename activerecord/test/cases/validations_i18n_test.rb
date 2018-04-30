@@ -491,6 +491,15 @@ class ActiveRecordErrorI18nTests < ActiveSupport::TestCase
     assert_equal "foo bar", @reply.errors[:title]
   end
 
+  test "#generate_message works on anonymous classes" do
+    store_translations(:errors => { :messages => { :foo => "You fooed." } })
+    anonymous_reply = Class.new(ActiveRecord::Base) do
+      self.table_name = 'posts'
+    end.new
+    anonymous_reply.errors.add(:title, :foo)
+    assert_equal 'You fooed.', anonymous_reply.errors[:title]
+  end
+
   test "#generate_message passes the model attribute value for interpolation" do
     store_translations(:errors => { :messages => { :foo => "You fooed: %{value}." } })
     @reply.title = "da title"

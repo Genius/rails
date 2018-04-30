@@ -343,7 +343,7 @@ module ActiveRecord
       def callback(method)
         result = run_callbacks(method) { |result, object| false == result }
 
-        if result != false && respond_to_without_attributes?(method)
+        if result != false && (respond_to_without_attributes?(method) || protected_methods.include?(method.to_sym))
           result = send(method)
         end
 

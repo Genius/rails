@@ -1,6 +1,8 @@
+require File.expand_path('../../railslts-version/lib/railslts-version', __FILE__)
+
 Gem::Specification.new do |s|
   s.name = 'activeresource'
-  s.version = '2.3.18'
+  s.version = RailsLts::VERSION::STRING
   s.summary = 'Think Active Record for web resources.'
   s.description = 'Wraps web resources in model classes that can be manipulated through XML over REST.'
 
@@ -13,5 +15,5 @@ Gem::Specification.new do |s|
   s.rdoc_options = ['--main', 'README']
   s.extra_rdoc_files = ['README']
 
-  s.add_dependency 'activesupport', '= 2.3.18'
+  s.add_dependency 'activesupport', "= #{RailsLts::VERSION::STRING}"
 end

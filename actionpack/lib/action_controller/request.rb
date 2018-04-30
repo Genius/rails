@@ -382,7 +382,7 @@ EOM
 
     # Returns both GET and POST \parameters in a single hash.
     def parameters
-      @parameters ||= request_parameters.merge(query_parameters).update(path_parameters).with_indifferent_access
+      @parameters ||= ParamsHashWithIndifferentAccess.new(encode_params(request_parameters.merge(query_parameters).update(path_parameters)))
     end
     alias_method :params, :parameters
 
@@ -497,6 +497,28 @@ EOM
           value
         end
       end
+
+      def encode_params(params)
+        return params unless ActiveSupport.modern_ruby?
+
+        if params.is_a?(String)
+          return params.force_encoding("UTF-8").encode!
+        elsif !params.is_a?(Hash)
+          return params
+        end
+
+        params.each do |k, v|
+          case v
+          when Hash
+            encode_params(v)
+          when Array
+            v.map! {|el| encode_params(el) }
+          else
+            encode_params(v)
+          end
+        end
+      end
+
     protected
 
     # Remove nils from the params hash

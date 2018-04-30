@@ -82,6 +82,27 @@ class SanitizerTest < ActionController::TestCase
     assert_sanitized %(<a href="foo" onclick="bar"><script>baz</script></a>), %(<a href="foo"></a>)
   end
 
+  # Test for CVE-2015-7578
+  # The sanitizer of this version of Rails LTS is not affected. We add some tests to confirm this.
+  # While the video tag is not officially supported by the sanitizer of this version of Rails LTS,
+  # applications might have been configured to allow videos tags containing poster URIs as below.
+  def test_video_poster_sanitization
+    old_allowed_tags = HTML::WhiteListSanitizer.allowed_tags
+    old_allowed_attributes = HTML::WhiteListSanitizer.allowed_attributes
+    old_uri_attributes = HTML::WhiteListSanitizer.uri_attributes
+
+    HTML::WhiteListSanitizer.allowed_tags = ['video']
+    HTML::WhiteListSanitizer.allowed_attributes = ['poster', 'src']
+    HTML::WhiteListSanitizer.uri_attributes << 'poster'
+
+    assert_sanitized %(<video src="videofile.ogg" autoplay  poster="posterimage.jpg"></video>), %(<video src="videofile.ogg" poster="posterimage.jpg"></video>)
+    assert_sanitized %(<video src="videofile.ogg" poster=javascript:alert(1)></video>), %(<video src="videofile.ogg"></video>)
+  ensure
+    HTML::WhiteListSanitizer.allowed_tags = old_allowed_tags
+    HTML::WhiteListSanitizer.allowed_attributes = old_allowed_attributes
+    HTML::WhiteListSanitizer.uri_attributes = old_uri_attributes
+  end
+
   # RFC 3986, sec 4.2
   def test_allow_colons_in_path_component
     assert_sanitized("<a href=\"./this:that\">foo</a>")
@@ -204,7 +225,7 @@ class SanitizerTest < ActionController::TestCase
 
   # fucked
   def test_should_sanitize_attributes
-    assert_sanitized %(<SPAN title="'><script>alert()</script>">blah</SPAN>), %(<span title="'&gt;&lt;script&gt;alert()&lt;/script&gt;">blah</span>)
+    assert_sanitized %(<SPAN title="'><script>alert()</script>">blah</SPAN>), %(<span title="&#39;&gt;&lt;script&gt;alert()&lt;/script&gt;">blah</span>)
   end
 
   def test_should_sanitize_illegal_style_properties
@@ -284,7 +305,59 @@ class SanitizerTest < ActionController::TestCase
     assert_sanitized %(<a href="http&#x3A;//legit">), %(<a href="http://legit">)
   end
 
+  def test_sanitize_data_attributes
+    assert_sanitized %(<a href="/blah" data-method="post">foo</a>), %(<a href="/blah">foo</a>)
+    assert_sanitized %(<a data-remote="true" data-type="script" data-method="get" data-cross-domain="true" href="attack.js">Launch the missiles</a>), %(<a href="attack.js">Launch the missiles</a>)
+  end
+
+  def test_allow_data_attribute_if_requested
+    text = %(<a data-foo="foo">foo</a>)
+    assert_equal %(<a data-foo="foo">foo</a>), white_list_sanitize(text, :attributes => ['data-foo'])
+  end
+
+  # Test for CVE-2015-7579
+  # The sanitizer of this version of Rails LTS is not affected. We add some tests to confirm this.
+  def test_full_sanitize_respect_html_escaping_of_the_given_string
+    sanitizer = HTML::FullSanitizer.new
+    assert_equal 'test\r\nstring', sanitizer.sanitize('test\r\nstring')
+    assert_equal '&', sanitizer.sanitize('&', :encode_special_chars => false)
+    assert_equal '&amp;', sanitizer.sanitize('&amp;')
+    assert_equal '&amp;amp;', sanitizer.sanitize('&amp;amp;')
+    assert_equal 'omg &lt;script&gt;BOM&lt;/script&gt;', sanitizer.sanitize('omg &lt;script&gt;BOM&lt;/script&gt;')
+  end
+
+  # Test for CVE-2015-7580
+  # The sanitizer of this version of Rails LTS is not affected. We add some tests to confirm this.
+  def test_sanitize_nested_script
+    sanitizer = HTML::WhiteListSanitizer.new
+    assert_equal '', sanitizer.sanitize('<script><script></script>alert("XSS");<script><</script>/</script><script>script></script>', :tags => %w(em))
+    assert_equal '<em></em>', sanitizer.sanitize('<em><script><script></script>alert("XSS");<script><</script>/</script><script>script></script></em>', :tags => %w(em))
+  end
+
+  # Test for CVE-2015-7580
+  # The sanitizer of this version of Rails LTS is not affected. We add some tests to confirm this.
+  def test_sanitize_nested_script_in_style
+    sanitizer = HTML::WhiteListSanitizer.new
+
+    # Behaves differently than rails-html-sanitizer; output is still acceptable as it does not allow XSS.
+    assert_equal 'alert("XSS");&lt;/script>', sanitizer.sanitize('<style><script></style>alert("XSS");<style><</style>/</style><style>script></style>', :tags => %w(em))
+
+    # Another test to confirm that the style tags' cdata will be sanitized well enough to avoid XSS:
+    assert_equal '&lt;script>alert("XSS");&lt;/script>', sanitizer.sanitize('<style><</style>script<style>></style>alert("XSS");<style><</style>/script<style>></style>', :tags => %w(em))
+    assert_equal '<em>&lt;script>alert("XSS");&lt;/script></em>', sanitizer.sanitize('<em><style><</style>script<style>></style>alert("XSS");<style><</style>/script<style>></style></em>', :tags => %w(em))
+  end
+
+  # Test for CVE-2018-3740
+  def test_injection_through_ssi
+    assert_sanitized %{<a href='examp<!--" unsafeattr=foo()>-->le.com'>test</a>}, %{<a href='examp&lt;!--&quot; unsafeattr=foo()&gt;--&gt;le.com'>test</a>}
+  end
+
 protected
+
+  def white_list_sanitize(input, options = {})
+    HTML::WhiteListSanitizer.new.sanitize(input, options)
+  end
+
   def assert_sanitized(input, expected = nil)
     @sanitizer ||= HTML::WhiteListSanitizer.new
     if input

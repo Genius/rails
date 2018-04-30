@@ -892,11 +892,14 @@ module ActionController #:nodoc:
 
         validate_render_arguments(options, extra_options, block_given?)
 
+        must_be_in_view_path = false
+
         if options.nil?
           options = { :template => default_template, :layout => true }
         elsif options == :update
           options = extra_options.merge({ :update => true })
         elsif options.is_a?(String) || options.is_a?(Symbol)
+          must_be_in_view_path = true
           case options.to_s.index('/')
           when 0
             extra_options[:file] = options
@@ -930,16 +933,16 @@ module ActionController #:nodoc:
 
         else
           if file = options[:file]
-            render_for_file(file, options[:status], layout, options[:locals] || {})
+            render_for_file(file, options[:status], layout, options[:locals] || {}, must_be_in_view_path)
 
           elsif template = options[:template]
-            render_for_file(template, options[:status], layout, options[:locals] || {})
+            render_for_file(template, options[:status], layout, options[:locals] || {}, must_be_in_view_path)
 
           elsif inline = options[:inline]
             render_for_text(@template.render(options.merge(:layout => layout)), options[:status])
 
           elsif action_name = options[:action]
-            render_for_file(default_template(action_name.to_s), options[:status], layout)
+            render_for_file(default_template(action_name.to_s), options[:status], layout, {}, must_be_in_view_path)
 
           elsif xml = options[:xml]
             response.content_type ||= Mime::XML
@@ -1246,10 +1249,15 @@ module ActionController #:nodoc:
       end
 
     private
-      def render_for_file(template_path, status = nil, layout = nil, locals = {}) #:nodoc:
+      def render_for_file(template_path, status = nil, layout = nil, locals = {}, must_be_in_view_path = false) #:nodoc:
         path = template_path.respond_to?(:path_without_format_and_extension) ? template_path.path_without_format_and_extension : template_path
         logger.info("Rendering #{path}" + (status ? " (#{status})" : '')) if logger
-        render_for_text @template.render(:file => template_path, :locals => locals, :layout => layout), status
+        if must_be_in_view_path
+          text = @template.render(:file_in_view_path => template_path, :locals => locals, :layout => layout)
+        else
+          text = @template.render(:file => template_path, :locals => locals, :layout => layout)
+        end
+        render_for_text text, status
       end
 
       def render_for_text(text = nil, status = nil, append_response = false) #:nodoc:
@@ -1276,6 +1284,10 @@ module ActionController #:nodoc:
 
         if !extra_options.is_a?(Hash)
           raise RenderError, "You called render with invalid options : #{options.inspect}, #{extra_options.inspect}"
+        end
+
+        if options.is_a?(ParamsHashWithIndifferentAccess) || extra_options.is_a?(ParamsHashWithIndifferentAccess)
+          raise ArgumentError, "passing params directly to render is not permitted"
         end
       end
 
@@ -1332,7 +1344,7 @@ module ActionController #:nodoc:
         if action_methods.include?(action_name)
           send(action_name)
           default_render unless performed?
-        elsif respond_to? :method_missing
+        elsif ActiveSupport.legacy_respond_to?(self, :method_missing)
           method_missing action_name
           default_render unless performed?
         else

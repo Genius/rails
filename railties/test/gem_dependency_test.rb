@@ -1,4 +1,19 @@
-Bundler.with_clean_env do
+if RUBY_VERSION >= '2'
+  # we no longer support this
+  exit(0)
+end
+
+def with_clean_env
+  if defined?(Bundler)
+    Bundler.with_clean_env do
+      yield
+    end
+  else
+    yield
+  end
+end
+
+with_clean_env do
   require 'plugin_test_helper'
 
   class Rails::GemDependency
@@ -119,8 +134,8 @@ Bundler.with_clean_env do
         assert_equal '0.6.0', DUMMY_GEM_C_VERSION
       end
     end
-    
-    def test_gem_load_frozen_when_platform_string_is_present    
+
+    def test_gem_load_frozen_when_platform_string_is_present
       not_with_bundler do
         dummy_gem = Rails::GemDependency.new "dummy-gem-l"
         dummy_gem.add_load_paths
@@ -224,24 +239,27 @@ Bundler.with_clean_env do
         assert_equal false, Rails::GemDependency.new("dummy-gem-j").built?
       end
     end
-    
+
     def test_gem_determines_build_status_only_on_vendor_gems
       framework_gem = Rails::GemDependency.new('dummy-framework-gem')
       framework_gem.stubs(:framework_gem?).returns(true)  # already loaded
       framework_gem.stubs(:vendor_rails?).returns(false)  # but not in vendor/rails
       framework_gem.stubs(:vendor_gem?).returns(false)  # and not in vendor/gems
-      framework_gem.add_load_paths  # freeze framework gem early 
+      framework_gem.add_load_paths  # freeze framework gem early
       assert framework_gem.built?
     end
 
     def test_gem_build_passes_options_to_dependencies
-      not_with_bundler do
-        start_gem = Rails::GemDependency.new("dummy-gem-g")
-        dep_gem = Rails::GemDependency.new("dummy-gem-f")
-        start_gem.stubs(:dependencies).returns([dep_gem])
-        dep_gem.expects(:build).with({ :force => true }).once
-        start_gem.build(:force => true)
-      end
+      mock_spec = mock()
+      mock_spec.stubs(:full_name).returns('Dummy Gem G')
+      mock_spec.stubs(:version).returns('0.6')
+      start_gem = Rails::GemDependency.new("dummy-gem-g")
+      dep_gem = Rails::GemDependency.new("dummy-gem-f")
+      start_gem.stubs(:dependencies).returns([dep_gem])
+      start_gem.stubs(:specification).returns(mock_spec)
+      start_gem.stubs(:built?).returns(true)
+      dep_gem.expects(:build).with({ :force => false }).once
+      start_gem.build(:force => false)
     end
 
   end

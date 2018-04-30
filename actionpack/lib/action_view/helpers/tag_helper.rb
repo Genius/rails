@@ -141,7 +141,7 @@ module ActionView
                 end
               end
             else
-              attrs = options.map { |key, value| %(#{key}="#{value}") }
+              attrs = options.map { |key, value| %(#{key}="#{value.to_s.gsub(/"/, '&quot;')}") }
             end
             " #{attrs.sort * ' '}".html_safe unless attrs.empty?
           end

@@ -1,4 +1,4 @@
-The code in this project is based on Ruby on Rails 2.3.18
+The code in this project is based on Ruby on Rails 2.3
 with additional changes by makandra GmbH.
 
   Additional changes Copyright (c) 2013 makandra GmbH
@@ -7,10 +7,10 @@ with additional changes by makandra GmbH.
   MIT license of Ruby on Rails 2.3.18 (found below) to any person
   obtaining a copy of this software and associated documentation
   files (the "Software"), except the right to publish, distribute,
-  and/or sell copies of the Software before June 27, 2015.
+  and/or sell copies of the Software before March 31, 2018.
 
 
-The original code for Ruby on Rails 2.3.18 is licensed under the MIT license:
+The original code for Ruby on Rails 2.3 is licensed under the MIT license:
 
   Copyright (c) 2004-2010 David Heinemeier Hansson
 

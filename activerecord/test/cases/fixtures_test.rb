@@ -151,7 +151,7 @@ class FixturesTest < ActiveRecord::TestCase
   end
 
   def test_dirty_dirty_yaml_file
-    assert_raise(Fixture::FormatError) do
+    assert_raise(::Fixture::FormatError) do
       Fixtures.new( Account.connection, "courses", 'Course', FIXTURES_ROOT + "/naked/yml/courses")
     end
   end
@@ -160,15 +160,20 @@ class FixturesTest < ActiveRecord::TestCase
     assert_not_nil Fixtures.new( Account.connection, "accounts", 'Account', FIXTURES_ROOT + "/naked/csv/accounts")
   end
 
-  def test_omap_fixtures
-    assert_nothing_raised do
-      fixtures = Fixtures.new(Account.connection, 'categories', 'Category', FIXTURES_ROOT + "/categories_ordered")
+  # yaml tags can be written as !!omap or !omap
+  # since behavior differs between ruby versions, we test both
+  %w[primary_tag_handle secondary_tag_handle].each do |tag_handle|
+    define_method :"test_omap_fixtures_#{tag_handle}" do
+      assert_nothing_raised do
+        fixtures = Fixtures.new(Account.connection, 'categories', 'Category', FIXTURES_ROOT + "/categories_ordered_" + tag_handle)
 
-      i = 0
-      fixtures.each do |name, fixture|
-        assert_equal "fixture_no_#{i}", name
-        assert_equal "Category #{i}", fixture['name']
-        i += 1
+        assert_equal 100, fixtures.size
+        i = 0
+        fixtures.each do |name, fixture|
+          assert_equal "fixture_no_#{i}", name
+          assert_equal "Category #{i}", fixture['name']
+          i += 1
+        end
       end
     end
   end
