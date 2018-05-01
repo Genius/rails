@@ -28,6 +28,11 @@ class ActiveRecordI18nTests < Test::Unit::TestCase
     assert_equal 'topic title attribute', Reply.human_attribute_name('title')
   end
 
+  def test_translated_model_attributes_for_anonymous_classes
+    I18n.backend.store_translations 'en', :activerecord => {:attributes => {:topic => {:title => 'topic title attribute'} } }
+    assert_equal 'topic title attribute', Class.new(Topic).human_attribute_name('title')
+  end
+
   def test_translated_model_names
     I18n.backend.store_translations 'en', :activerecord => {:models => {:topic => 'topic model'} }
     assert_equal 'topic model', Topic.human_name
@@ -41,6 +46,11 @@ class ActiveRecordI18nTests < Test::Unit::TestCase
   def test_translated_model_names_with_sti_fallback
     I18n.backend.store_translations 'en', :activerecord => {:models => {:topic => 'topic model'} }
     assert_equal 'topic model', Reply.human_name
+  end
+
+  def test_translated_model_names_for_anonymous_classes
+    I18n.backend.store_translations 'en', :activerecord => {:models => {:topic => 'topic model'} }
+    assert_equal 'topic model', Class.new(Topic).human_name
   end
 end
 

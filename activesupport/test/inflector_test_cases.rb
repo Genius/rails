@@ -179,7 +179,7 @@ module InflectorTestCases
   }
 
   # Ruby 1.9 doesn't do Unicode normalization yet.
-  if RUBY_VERSION >= '1.9'
+  if RUBY_VERSION >= '1.9' && !ActiveSupport.modern_ruby?
     StringToParameterizedAndNormalized = {
       "Malmö"                               => "malm",
       "Garçons"                             => "gar-ons",

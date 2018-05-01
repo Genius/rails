@@ -1,6 +1,7 @@
 # encoding: utf-8
 require 'abstract_unit'
 require 'controller/fake_models'
+require 'forwardable'
 
 module RenderTestCases
   def setup_view(paths)
@@ -99,6 +100,13 @@ module RenderTestCases
     assert_equal "only partial", @view.render("test/partial_only")
   end
 
+  def test_render_with_params
+    params = ActionController::ParamsHashWithIndifferentAccess.new(:inline => '<%= raise "I am an RCE vulnerability" %>')
+    assert_raises ArgumentError do
+      @view.render(params)
+    end
+  end
+
   def test_render_partial
     assert_equal "only partial", @view.render(:partial => "test/partial_only")
   end
@@ -132,7 +140,23 @@ module RenderTestCases
     assert_match "undefined local variable or method `doesnt_exist'", e.message
     assert_equal "", e.sub_template_message
     assert_equal "1", e.line_number
-    assert_equal File.expand_path("#{FIXTURE_LOAD_PATH}/test/_raise.html.erb"), e.file_name
+    assert e.file_name.end_with?("test/_raise.html.erb")
+  end
+
+  def test_error_backtrace_is_not_killed_by_forwardable
+    wrapper = Class.new do
+      extend Forwardable
+
+      def initialize(view)
+        @view = view
+      end
+
+      def_delegators :@view, :render
+    end.new(@view)
+    wrapper.render(:partial => "test/raise")
+    flunk "Render did not raise TemplateError"
+  rescue ActionView::TemplateError => e
+    assert e.backtrace.present?
   end
 
   def test_render_sub_template_with_errors
@@ -140,9 +164,9 @@ module RenderTestCases
     flunk "Render did not raise TemplateError"
   rescue ActionView::TemplateError => e
     assert_match "undefined local variable or method `doesnt_exist'", e.message
-    assert_equal "Trace of template inclusion: #{File.expand_path("#{FIXTURE_LOAD_PATH}/test/sub_template_raise.html.erb")}", e.sub_template_message
+    assert_match(/Trace of template inclusion: .*test\/sub_template_raise\.html\.erb/, e.sub_template_message)
     assert_equal "1", e.line_number
-    assert_equal File.expand_path("#{FIXTURE_LOAD_PATH}/test/_raise.html.erb"), e.file_name
+    assert e.file_name.end_with?("test/_raise.html.erb")
   end
 
   def test_render_object
@@ -297,23 +321,23 @@ class ReloadableRenderTest < Test::Unit::TestCase
     end
 
     def test_render_utf8_template_with_incompatible_external_encoding
-      with_external_encoding Encoding::SJIS do
+      with_external_encoding Encoding::Windows_31J do
         begin
           result = @view.render(:file => "test/utf8.html.erb", :layouts => "layouts/yield")
           flunk 'Should have raised incompatible encoding error'
         rescue ActionView::TemplateError => error
-          assert_match 'invalid byte sequence in Shift_JIS', error.original_exception.message
+          assert_match 'invalid byte sequence in Windows-31J', error.original_exception.message
         end
       end
     end
 
     def test_render_utf8_template_with_partial_with_incompatible_encoding
-      with_external_encoding Encoding::SJIS do
+      with_external_encoding Encoding::Windows_31J do
         begin
           result = @view.render(:file => "test/utf8_magic_with_bare_partial.html.erb", :layouts => "layouts/yield")
           flunk 'Should have raised incompatible encoding error'
         rescue ActionView::TemplateError => error
-          assert_match 'invalid byte sequence in Shift_JIS', error.original_exception.message
+          assert_match 'invalid byte sequence in Windows-31J', error.original_exception.message
         end
       end
     end

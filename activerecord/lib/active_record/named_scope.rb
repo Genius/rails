@@ -155,7 +155,7 @@ module ActiveRecord
       end
 
       def respond_to?(method, include_private = false)
-        super || @proxy_scope.respond_to?(method, include_private)
+        super || protected_methods.include?(method) || ActiveSupport.legacy_respond_to?(@proxy_scope, method, include_private)
       end
 
       def any?

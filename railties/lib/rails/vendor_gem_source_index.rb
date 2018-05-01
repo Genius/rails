@@ -1,6 +1,11 @@
 require 'rubygems'
 require 'yaml'
 
+unless Rails.enable_gem_handling?
+  # this should actually never be reached, because this file is not supposed to be required on modern rubies
+  raise 'this no longer works on modern rubies'
+end
+
 module Rails
 
   class VendorGemSourceIndex

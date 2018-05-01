@@ -187,6 +187,9 @@ module ActiveRecord
     # * <tt>:allow_concurrency</tt> - If true, use async query methods so Ruby threads don't deadlock; otherwise, use blocking query methods.
     class PostgreSQLAdapter < AbstractAdapter
       ADAPTER_NAME = 'PostgreSQL'.freeze
+      # get rid of deprecation warnings
+      PGconn = defined?(::PG::Connection) ? ::PG::Connection : ::PGconn
+      PGError = defined?(::PG::Error) ? ::PG::Error : ::PGError
 
       NATIVE_DATABASE_TYPES = {
         :primary_key => "serial primary key".freeze,

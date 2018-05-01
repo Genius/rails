@@ -11,5 +11,4 @@ railties/doc/guides/html/images
 railties/doc/guides/html/stylesheets
 railties/guides/output
 .idea
-/*/pkg/*.gem
-/dist/railslts/pkg
+pkg/*.gem

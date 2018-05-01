@@ -58,6 +58,7 @@ module ActionController
   autoload :MiddlewareStack, 'action_controller/middleware_stack'
   autoload :MimeResponds, 'action_controller/mime_responds'
   autoload :ParamsParser, 'action_controller/params_parser'
+  autoload :ParamsHashWithIndifferentAccess, 'action_controller/params_hash_with_indifferent_access'
   autoload :PolymorphicRoutes, 'action_controller/polymorphic_routes'
   autoload :RecordIdentifier, 'action_controller/record_identifier'
   autoload :Reloader, 'action_controller/reloader'

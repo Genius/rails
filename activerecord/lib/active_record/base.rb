@@ -517,7 +517,7 @@ module ActiveRecord #:nodoc:
     @@timestamped_migrations = true
 
     # Determine whether to store the full constant name including namespace when using STI
-    class_attribute :store_full_sti_class
+    class_attribute :store_full_sti_class, :instance_writer => false
     self.store_full_sti_class = false
 
     # Stores the default scope for the class
@@ -1395,8 +1395,8 @@ module ActiveRecord #:nodoc:
       # Specify +options+ with additional translating options.
       def human_attribute_name(attribute_key_name, options = {})
         defaults = self_and_descendants_from_active_record.map do |klass|
-          :"#{klass.name.underscore}.#{attribute_key_name}"
-        end
+          :"#{klass.name.underscore}.#{attribute_key_name}" if klass.name.present?
+        end.compact
         defaults << options[:default] if options[:default]
         defaults.flatten!
         defaults << attribute_key_name.to_s.humanize
@@ -1410,9 +1410,9 @@ module ActiveRecord #:nodoc:
       # Specify +options+ with additional translating options.
       def human_name(options = {})
         defaults = self_and_descendants_from_active_record.map do |klass|
-          :"#{klass.name.underscore}"
-        end 
-        defaults << self.name.humanize
+          :"#{klass.name.underscore}" if klass.name.present?
+        end.compact
+        defaults << self.name.humanize if self.name.present?
         I18n.translate(defaults.shift, {:scope => [:activerecord, :models], :count => 1, :default => defaults}.merge(options))
       end
 
@@ -2929,7 +2929,8 @@ module ActiveRecord #:nodoc:
           if k.to_s.include?("(")
             multiparameter_attributes << [ k, v ]
           else
-            respond_to?(:"#{k}=") ? send(:"#{k}=", v) : raise(UnknownAttributeError, "unknown attribute: #{k}")
+            setter = :"#{k}="
+            ActiveSupport.legacy_respond_to?(self, setter) ? send(setter, v) : raise(UnknownAttributeError, "unknown attribute: #{k}")
           end
         end
 

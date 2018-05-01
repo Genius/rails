@@ -404,14 +404,6 @@ class RouteBuilderTest < Test::Unit::TestCase
     assert_equal 'ulysses', segment.value
   end
 
-  def test_segment_for_action
-    segment, rest = builder.segment_for ':action'
-    assert_equal '', rest
-    assert_kind_of ROUTING::DynamicSegment, segment
-    assert_equal :action, segment.key
-    assert_equal 'index', segment.default
-  end
-
   def test_segment_for_dynamic
     segment, rest = builder.segment_for ':login'
     assert_equal '', rest

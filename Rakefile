@@ -1,86 +1,27 @@
 require 'rake'
+require RAKEVERSION == '0.8.0' ? 'rake/gempackagetask' : 'rubygems/package_task'
+require File.expand_path('../railslts-version/lib/railslts-version', __FILE__)
 
-env = %(PKG_BUILD="#{ENV['PKG_BUILD']}") if ENV['PKG_BUILD']
+BRANCH = '2-3-lts'
+SUB_PROJECT_PATHS = %w(activesupport railties actionpack actionmailer activeresource activerecord railslts-version)
+ALL_PROJECT_PATHS = ['.', *SUB_PROJECT_PATHS]
 
-PROJECTS = %w(activesupport railties actionpack actionmailer activeresource activerecord)
+fail = lambda { |message|
+  STDERR.puts "\e[31m#{message}\e[0m" # red
+  exit(1)
+}
 
-Dir["#{File.dirname(__FILE__)}/*/lib/*/version.rb"].each do |version_path|
-  require version_path
-end
+run = lambda { |command|
+  info = command.sub(/:\/\/\w+\:[^@]+@/, '://...@')
+  puts "\e[35m#{info}\e[0m" # pink
+  result = system(command)
+  result or fail.call("Failed to execute `#{info}`")
+  true
+}
 
-desc 'Run all tests by default'
-task :default => :test
-
-%w(test rdoc pgem package release gem).each do |task_name|
-  desc "Run #{task_name} task for all projects"
-  task task_name do
-    PROJECTS.each do |project|
-      warn 'When running tests for Rails LTS, prefer running the "railslts:test" task.'
-      system %(cd #{project} && #{env} rake _#{RAKEVERSION}_ #{task_name}) or raise 'failed'
-    end
-  end
-end
-
-if RAKEVERSION == '0.8.0'
-  require 'rake/rdoctask'
-
-  # In order to generate the API please install Ruby 1.8.7 and rake 0.8.0. Then:
-  #
-  #     rake _0.8.0_ task_name
-  #
-  # Reason is the Jamis template used for the API needs RDoc 1.x. Recent rake libs
-  # do not provide rake/rdoctask, and RDoc 1.x provides no alternative task. This
-  # is easy to setup with a Ruby version manager.
-  desc "Generate documentation for the Rails framework"
-  Rake::RDocTask.new do |rdoc|
-    rdoc.rdoc_dir = 'doc/rdoc'
-    rdoc.title    = "Ruby on Rails Documentation"
-    rdoc.main     = "railties/README"
-
-    rdoc.options << '--line-numbers' << '--inline-source'
-    rdoc.options << '-A cattr_accessor=object'
-    rdoc.options << '--charset' << 'utf-8'
-    rdoc.options << '--main' << 'railties/README'
-
-    rdoc.template = ENV['template'] ? "#{ENV['template']}.rb" : './doc/template/horo'
-
-    rdoc.rdoc_files.include('railties/CHANGELOG')
-    rdoc.rdoc_files.include('railties/LICENSE')
-    rdoc.rdoc_files.include('railties/README')
-    rdoc.rdoc_files.include('railties/lib/{*.rb,commands/*.rb,rails/*.rb,rails_generator/*.rb}')
-
-    rdoc.rdoc_files.include('activerecord/README')
-    rdoc.rdoc_files.include('activerecord/CHANGELOG')
-    rdoc.rdoc_files.include('activerecord/lib/active_record/**/*.rb')
-    rdoc.rdoc_files.exclude('activerecord/lib/active_record/vendor/*')
-
-    rdoc.rdoc_files.include('activeresource/README')
-    rdoc.rdoc_files.include('activeresource/CHANGELOG')
-    rdoc.rdoc_files.include('activeresource/lib/active_resource.rb')
-    rdoc.rdoc_files.include('activeresource/lib/active_resource/*')
-
-    rdoc.rdoc_files.include('actionpack/README')
-    rdoc.rdoc_files.include('actionpack/CHANGELOG')
-    rdoc.rdoc_files.include('actionpack/lib/action_controller/**/*.rb')
-    rdoc.rdoc_files.include('actionpack/lib/action_view/**/*.rb')
-    rdoc.rdoc_files.exclude('actionpack/lib/action_controller/vendor/*')
-
-    rdoc.rdoc_files.include('actionmailer/README')
-    rdoc.rdoc_files.include('actionmailer/CHANGELOG')
-    rdoc.rdoc_files.include('actionmailer/lib/action_mailer/base.rb')
-    rdoc.rdoc_files.exclude('actionmailer/lib/action_mailer/vendor/*')
-
-    rdoc.rdoc_files.include('activesupport/README')
-    rdoc.rdoc_files.include('activesupport/CHANGELOG')
-    rdoc.rdoc_files.include('activesupport/lib/active_support/**/*.rb')
-    rdoc.rdoc_files.exclude('activesupport/lib/active_support/vendor/*')
-  end
-
-  # Enhance rdoc task to copy referenced images also
-  task :rdoc do
-    FileUtils.mkdir_p "doc/rdoc/files/examples/"
-    FileUtils.copy "activerecord/examples/associations.png", "doc/rdoc/files/examples/associations.png"
-  end
+rails_gemspec = eval(File.read('rails.gemspec'))
+Gem::PackageTask.new(rails_gemspec) do |p|
+  p.gem_spec = rails_gemspec
 end
 
 namespace :railslts do
@@ -89,102 +30,115 @@ namespace :railslts do
   task :test do
 
     puts '', "\033[44m#{'activesupport'}\033[0m", ''
-    system('cd activesupport && rake test')
+    run.call('cd activesupport && rake test')
 
     puts '', "\033[44m#{'actionmailer'}\033[0m", ''
-    system('cd actionmailer && rake test')
+    run.call('cd actionmailer && rake test')
 
     puts '', "\033[44m#{'actionpack'}\033[0m", ''
-    system('cd actionpack && rake test')
+    run.call('cd actionpack && rake test')
 
     puts '', "\033[44m#{'activerecord (mysql)'}\033[0m", ''
-    system('cd activerecord && rake test_mysql')
+    run.call('cd activerecord && rake test_mysql')
 
     puts '', "\033[44m#{'activerecord (sqlite3)'}\033[0m", ''
-    system('cd activerecord && rake test_sqlite3')
+    run.call('cd activerecord && rake test_sqlite3')
 
     puts '', "\033[44m#{'activerecord (postgres)'}\033[0m", ''
-    system('cd activerecord && rake test_postgresql')
+    run.call('cd activerecord && rake test_postgresql')
 
     puts '', "\033[44m#{'activeresource'}\033[0m", ''
-    system('cd activeresource && rake test')
+    run.call('cd activeresource && rake test')
 
     puts '', "\033[44m#{'railties'}\033[0m", ''
-    system('cd railties && rake test')
+    run.call('cd railties && rake test')
+
+    puts '', "\033[44m#{'railslts-version'}\033[0m", ''
+    run.call('cd railslts-version && rake test')
 
   end
 
-  task :clean_gems do
-    PROJECTS.each do |project|
-      pkg_folder = "#{project}/pkg"
-      puts "Emptying packages folder #{pkg_folder}..."
-      FileUtils.mkdir_p(pkg_folder)
-      system("rm -rf #{pkg_folder}/*") or raise "failed"
+  namespace :gems do
+
+    # Clean previous .gem files in pkg/ folder of root and sub-projects
+    task :delete do
+      ALL_PROJECT_PATHS.each do |project|
+        pkg_folder = "#{project}/pkg"
+        puts "Emptying packages folder #{pkg_folder}..."
+        FileUtils.mkdir_p(pkg_folder)
+        run.call("rm -f #{pkg_folder}/*.gem")
+      end
     end
-  end
 
-  desc 'Move *.gem packages from sub-projects to dist/pkg for easier archiving'
-  task :consolidate_gems do
-    PROJECTS.each do |project|
-      pkg_folder = "#{project}/pkg"
-      puts "Rename and move .gem from #{pkg_folder}..."
-      gem_paths = Dir.glob("#{pkg_folder}/*.gem")
-      gem_paths.size == 1 or raise "Only expected a single .gem file but got #{gem_paths.inspect}"
-      source_path = gem_paths.first
-      consolidated_pkg_folder = 'dist/railslts/pkg'
-      FileUtils.mkdir_p(consolidated_pkg_folder)
-      target_path = "#{consolidated_pkg_folder}/#{project}.gem"
-      FileUtils.mv(source_path, target_path)
+    task :ensure_old_rubygems do
+      if Gem::VERSION != '1.8.30'
+        fail "Please package with RubyGems version 1.8.30"
+      end
     end
-  end
 
-  task :clean_building_artifacts do
-    PROJECTS.each do |project|
-      pkg_folder = "#{project}/pkg"
-      puts "Deleting building artifacts from #{pkg_folder}..."
-      system("rm -rf #{pkg_folder}/*.tgz") or raise "failed" # TGZ
-      system("rm -rf #{pkg_folder}/*.zip") or raise "failed" # ZIP
-      system("rm -rf #{pkg_folder}/*/") or raise "failed"    # Folder
+    # Call :package task in sub-projects
+    task :package_all => :ensure_old_rubygems do
+      ALL_PROJECT_PATHS.each do |project|
+        run.call("cd #{project} && rake package")
+      end
     end
-  end
 
-  task :zip_gems do
-    puts "Zipping archive for manual installation..."
-    archive_name = "railslts.tar.gz"
-    system("cd dist && rm -f #{archive_name} && tar -czvhf #{archive_name} railslts/ && cd ..") or raise "failed"
-  end
+    # Clean up building artifacts left by :package tasks
+    task :clean_building_artifacts do
+      ALL_PROJECT_PATHS.each do |project|
+        pkg_folder = "#{project}/pkg"
+        puts "Deleting building artifacts from #{pkg_folder}..."
+        run.call("rm -rf #{pkg_folder}/*.tgz") # TGZ
+        run.call("rm -rf #{pkg_folder}/*.zip") # ZIP
+        run.call("rm -rf #{pkg_folder}/*/")    # Folder
+      end
+    end
 
-  desc 'Builds *.gem packages for static distribution without Git'
-  task :build_gems => [:clean_gems, :package, :consolidate_gems, :clean_building_artifacts, :zip_gems] do
-    puts "Done."
+    # Move *.gem packages from sub-projects's pkg to root's pkg for easier releasing
+    task :consolidate do
+      SUB_PROJECT_PATHS.each do |project|
+        pkg_folder = "#{project}/pkg"
+        gem_path = "#{pkg_folder}/#{project}-#{RailsLts::VERSION::STRING}.gem"
+        puts "Moving .gem from #{gem_path} to pkg ..."
+        File.file?(gem_path) or fail.call("Not found: #{gem_path}")
+        consolidated_pkg_folder = 'pkg'
+        FileUtils.mkdir_p(consolidated_pkg_folder)
+        FileUtils.mv(gem_path, consolidated_pkg_folder)
+      end
+    end
+
+    desc 'Builds *.gem packages for distribution without Git'
+    task :build => [:ensure_old_rubygems, :delete, :package_all, :consolidate, :clean_building_artifacts] do
+      puts 'Done.'
+    end
+
   end
 
   desc 'Updates the LICENSE file in individual sub-projects'
   task :update_license do
     require 'date'
     last_change = Date.parse(`git log -1 --format=%cd`)
-    PROJECTS.each do |project|
+    ALL_PROJECT_PATHS.each do |project|
+      next if project == 'railslts-version' # has no LICENSE file
       license_path = "#{project}/LICENSE"
       puts "Updating license #{license_path}..."
-      File.exists?(license_path) or raise "Could not find license: #{license_path}"
+      File.exists?(license_path) or fail.call("Could not find license: #{license_path}")
       license = File.read(license_path)
-      license.sub!(/ before(.*?)\./ , " before #{(last_change + 10).strftime("%B %d, %Y")}.") or raise "Couldn't find timestamp."
+      license.sub!(/ before(.*?)\./ , " before #{(last_change + 10).strftime("%B %d, %Y")}.") or fail.call("Couldn't find timestamp.")
       File.open(license_path, "w") { |w| w.write(license) }
     end
   end
 
-  namespace :release do
+  namespace :customer do
 
     task :ensure_ready do
       jobs = [
-        'Are you aware that you need to perform the following tasks on EVERY Rails LTS branch that was changed?',
-        'Did you release a new version of https://github.com/makandra/railslts-version ?',
-        'Did you bump the required "railslts-version" dependency in railties.gemspec?',
-        'Did you update the LICENSE files using `rake railslts:update_license` (only for 2.3 and 3.0)??',
-        'Did you build static gems using `rake railslts:build_gems` (only for 2.3 and 3.0)?',
+        "Did you update the version in railslts-version/lib/railslts-version.rb (currently #{RailsLts::VERSION::STRING})?",
+        'Did you update the LICENSE files using `rake railslts:update_license?',
         'Did you commit and push your changes, as well as the changes by the Rake tasks mentioned above?',
-        'Did you activate key forwarding for *.gems.makandra.de?',
-        'We will now publish the latest versions (2.3, 3.0 and 3.2) to gems.makandra.de. Ready?',
+        'Did you build static gems using `rake railslts:gems:build` (those are not pushed to Git)?',
+        'Did you activate key forwarding for *.railslts.makandra.de?',
+        "We will now publish the Rails LTS #{RailsLts::VERSION::STRING} for customers. Ready?",
       ]
 
       puts
@@ -194,58 +148,83 @@ namespace :railslts do
         answer = STDIN.gets
         puts
         unless answer.strip == 'y'
-          $stderr.puts "Aborting. Nothing was released."
+          $stderr.puts 'Aborting. Nothing was released.'
           puts
           exit
         end
       end
     end
 
-
-    desc "Publish new Rails LTS customer release on gems.makandra.de/railslts"
-    task :customer => :ensure_ready do
-      for hostname in %w[c23 c42 c32 c24]
-        fqdn = "#{hostname}.gems.makandra.de"
+    task :push_to_git_repo do
+      %w[c23 c42].each do |hostname|
+        fqdn = "#{hostname}.railslts.makandra.de"
         puts "\033[1mUpdating #{fqdn}...\033[0m"
-        command = '/opt/update_railslts.sh'
-        system "ssh deploy-gems_p@#{fqdn} '#{command}'" or raise 'Deployment failed'
-        puts "done."
+        command = "cd /var/www/railslts && git fetch origin #{BRANCH}:#{BRANCH}"
+        run.call "ssh deploy-gems_p@#{fqdn} '#{command}'"
+        puts 'Done.'
       end
 
-      puts 'Deployment done.'
-      puts "Now do a 'git clone https://gems.makandra.de/railslts lts-test-checkout',"
-      puts 'switch to the right branch(es) (e.g. 3-0-lts) and make sure your commits are present.'
+      puts 'Gems pushed to customer Git repo.'
+      puts "Now run `git clone -b #{BRANCH} https://gems.makandra.de/railslts #{BRANCH}-test-checkout`"
+      puts 'and make sure your commits are present.'
     end
 
-    desc "Publish new Rails LTS community release on github.com/makandra/rails"
-    task :community do
+    task :push_to_gem_server do
+      print 'Enter password for railslts-gems-admin.makandra.de: '
+      begin
+        system('stty -echo')
+        password = $stdin.gets.chomp
+      ensure
+        system('stty echo')
+      end
+      server_url = "https://admin:#{password}@railslts-gems-admin.makandra.de"
+      gem_paths = Dir.glob('pkg/*.gem')
+      gem_paths.size == ALL_PROJECT_PATHS.size or fail.call("Expected #{ALL_PROJECT_PATHS.size} .gem files, but only got #{gem_paths.inspect}")
+      gem_paths.each do |gem_path|
+        puts "Publishing #{gem_path}"
+        # Hide STDOUT since that will print the server URL including the password
+        run.call("gem push #{gem_path} --host #{server_url} > /dev/null")
+        puts "Waiting a bit..."
+        sleep 3
+      end
+    end
+
+    desc "Publish Rails LTS #{RailsLts::VERSION::STRING} for customers"
+    task :release => [:ensure_ready, :push_to_git_repo, :push_to_gem_server]
+
+  end
+
+  namespace :community do
+
+    task :push_to_git_repo do
       existing_remotes = `git remote`
       unless existing_remotes.include?('community')
-        system('git remote add community git@github.com:makandra/rails.git') or raise "Couldn't add remote'"
+        run.call('git remote add community git@github.com:makandra/rails.git')
       end
-      system('git fetch community') or raise 'Could not fetch from remote'
+      run.call('git fetch community')
 
-      puts "We will now publish the following changes to GitHub:"
+      puts 'We will now publish the following changes to GitHub:'
       puts
-      system('git log --oneline community/2-3-lts..HEAD') or raise 'Error showing log'
+      run.call("git log --oneline community/#{BRANCH}..HEAD")
       puts
 
-      puts "Do you want to proceed? [y/n]"
+      puts 'Do you want to proceed? [y/n]'
       answer = STDIN.gets
       puts
       unless answer.strip == 'y'
-        $stderr.puts "Aborting. Nothing was released."
+        $stderr.puts 'Aborting. Nothing was released.'
         puts
         exit
       end
 
-      system('git push community 2-3-lts') or raise 'Error while publishing'
-      puts "Deployment done."
-      puts "Check https://github.com/makandra/rails/tree/2-3-lts"
+      run.call("git push community #{BRANCH}")
+      puts 'Gems pushed to community github repo.'
+      puts "Check https://github.com/makandra/rails/tree/#{BRANCH} and make sure your commits are present"
     end
+
+    desc "Publish Rails LTS #{RailsLts::VERSION::STRING} for community subscribers"
+    task :release => :push_to_git_repo
 
   end
 
 end
-
-

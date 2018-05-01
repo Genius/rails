@@ -340,7 +340,7 @@ class TransactionTest < ActiveRecord::TestCase
     end
   end
   
-  if current_adapter?(:PostgreSQLAdapter) && defined?(PGconn::PQTRANS_IDLE)
+  if current_adapter?(:PostgreSQLAdapter) && defined?(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter::PGconn::PQTRANS_IDLE)
     def test_outside_transaction_works
       assert Topic.connection.outside_transaction?
       Topic.connection.begin_db_transaction

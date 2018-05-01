@@ -68,6 +68,10 @@ class RackStaticTest < ActiveSupport::TestCase
   end
 
   test "does not betray the existance of files outside root when using alternate path separators" do
+    if Dir.pwd.starts_with?('/vagrant')
+      $stderr.puts "Can't test file permissions on a vagrant share"
+      return
+    end
     filename = 'non_public_file.html'
     assert File.exist?(File.join(RAILS_ROOT, filename))
     path = "/%5C..%2F#{filename}"

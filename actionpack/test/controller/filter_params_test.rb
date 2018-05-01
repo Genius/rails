@@ -10,10 +10,10 @@ class FilterParamTest < Test::Unit::TestCase
 
   def test_filter_parameters
     assert FilterParamController.respond_to?(:filter_parameter_logging)
-    assert !@controller.respond_to?(:filter_parameters)
+    assert !@controller.respond_to?(:filter_parameters, true)
 
     FilterParamController.filter_parameter_logging
-    assert @controller.respond_to?(:filter_parameters)
+    assert @controller.respond_to?(:filter_parameters, true)
 
     test_hashes = [[{},{},[]],
     [{'foo'=>nil},{'foo'=>nil},[]],

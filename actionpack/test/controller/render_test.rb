@@ -448,6 +448,17 @@ class TestController < ActionController::Base
     render :template => "test/hello_world_from_rxml.builder"
   end
 
+  def dynamic_render
+    render params[:id] # => String, Hash
+  end
+
+  def dynamic_render_with_file
+    # This is extremely bad, but should be possible to do.
+    file = params[:id] # => String, Hash
+    render :file => file
+  end
+
+
   module RenderTestHelper
     def rjs_helper_method_from_module
       page.visual_effect :highlight
@@ -1581,6 +1592,44 @@ class RenderTest < ActionController::TestCase
     get :render_call_to_partial_with_layout_in_main_layout_and_within_content_for_layout
     assert_equal "Before (Anthony)\nInside from partial (Anthony)\nAfter\nBefore (David)\nInside from partial (David)\nAfter\nBefore (Ramm)\nInside from partial (Ramm)\nAfter", @response.body
   end
+
+  def test_dynamic_render_with_file
+    path = File.expand_path(File.join(File.dirname(__FILE__), '../fixtures/test/hello_world.erb'))
+    response = get :dynamic_render_with_file, { :id => path }
+    assert_equal File.read(path),
+      response.body
+  end
+
+  def test_dynamic_render_with_absolute_path
+    file = Tempfile.new('name')
+    file.write "secrets!"
+    file.flush
+    assert_raises ActionView::MissingTemplate do
+      get :dynamic_render, { :id => file.path }
+    end
+  ensure
+    file.close
+    file.unlink
+  end
+
+  def test_dynamic_render_file_hash
+    path = File.expand_path(File.join(File.dirname(__FILE__), '../fixtures/test/hello_world.erb'))
+    assert_raises ArgumentError do
+      get :dynamic_render, { :id => { :file => path } }
+    end
+  end
+
+  def test_dynamic_render_inline_hash
+    assert_raises ArgumentError do
+      get :dynamic_render, { :id => { :inline => '<%= raise "I am an RCE vulnerability" %>' } }
+    end
+  end
+
+  def test_dynamic_render_action
+    get :dynamic_render, { :id => 'hello_world' }
+    assert_template "test/hello_world"
+  end
+
 end
 
 class ExpiresInRenderTest < ActionController::TestCase

@@ -2,8 +2,8 @@ require 'set'
 
 module Mime
   SET              = []
-  EXTENSION_LOOKUP = Hash.new { |h, k| h[k] = Type.new(k) unless k.blank? }
-  LOOKUP           = Hash.new { |h, k| h[k] = Type.new(k) unless k.blank? }
+  EXTENSION_LOOKUP = {}
+  LOOKUP           = {}
 
   # Encapsulates the notion of a mime type. Can be used at render time, for example, with:
   #
@@ -27,7 +27,7 @@ module Mime
     # only needs to protect against these types.
     @@browser_generated_types = Set.new [:html, :url_encoded_form, :multipart_form, :text]
     cattr_reader :browser_generated_types
-
+    attr_reader :symbol
 
     @@unverifiable_types = Set.new [:text, :json, :csv, :xml, :rss, :atom, :yaml]
     def self.unverifiable_types
@@ -63,11 +63,16 @@ module Mime
 
     class << self
       def lookup(string)
-        LOOKUP[string]
+        type = LOOKUP[string]
+        type ||= Type.new(string) if string.present?
+        type
       end
 
       def lookup_by_extension(extension)
-        EXTENSION_LOOKUP[extension]
+        extension = extension.to_s
+        type = EXTENSION_LOOKUP[extension]
+        type ||= Type.new(extension) if extension.present?
+        type
       end
 
       # Registers an alias that's not used on mime type lookup, but can be referenced directly. Especially useful for
@@ -143,10 +148,13 @@ module Mime
         end
       end
     end
+
+    attr_reader :hash
     
     def initialize(string, symbol = nil, synonyms = [])
       @symbol, @synonyms = symbol, synonyms
       @string = string
+      @hash = [@string, @synonyms, @symbol].hash
     end
     
     def to_s
@@ -176,6 +184,13 @@ module Mime
       end
     end
 
+    def eql?(other)
+      super || (self.class == other.class &&
+        @string    == other.string &&
+        @synonyms  == other.synonyms &&
+        @symbol    == other.symbol)
+    end
+
     def =~(mime_type)
       return false if mime_type.blank?
       regexp = Regexp.new(Regexp.quote(mime_type.to_s))
@@ -197,6 +212,14 @@ module Mime
     def browser_generated?
       @@browser_generated_types.include?(to_sym)
     end
+
+    def respond_to?(method, include_private = false) #:nodoc:
+      super || method.to_s =~ /(\w+)\?$/
+    end
+
+    protected
+
+    attr_reader :string, :synonyms
 
     private
       def method_missing(method, *args)

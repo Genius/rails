@@ -44,7 +44,7 @@ module ActiveRecord
       base.alias_method_chain :update,          :dirty
       base.alias_method_chain :reload,          :dirty
 
-      base.class_attribute :partial_updates
+      base.class_attribute :partial_updates, :instance_writer => false
       base.partial_updates = true
 
       base.send(:extend, ClassMethods)

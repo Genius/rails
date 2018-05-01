@@ -52,7 +52,7 @@ class NamedScopeTest < ActiveRecord::TestCase
   end
 
   def test_scope_should_respond_to_own_methods_and_methods_of_the_proxy
-    assert Topic.approved.respond_to?(:proxy_found)
+    assert Topic.approved.respond_to?(:proxy_found, true)
     assert Topic.approved.respond_to?(:count)
     assert Topic.approved.respond_to?(:length)
   end

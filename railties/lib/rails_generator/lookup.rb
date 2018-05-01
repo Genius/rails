@@ -113,7 +113,7 @@ module Rails
           end
           sources << PathSource.new(:user, "#{Dir.user_home}/.rails/generators")
           if Object.const_defined?(:Gem)
-            sources << GemGeneratorSource.new
+            sources << GemGeneratorSource.new if defined?(GemGeneratorSource)
             sources << GemPathSource.new
           end
           sources << PathSource.new(:builtin, "#{File.dirname(__FILE__)}/generators/components")
@@ -203,19 +203,21 @@ module Rails
       end
     end
 
-    # GemGeneratorSource hits the mines to quarry for generators.  The latest versions
-    # of gems named *_generator are selected.
-    class GemGeneratorSource < AbstractGemSource
-      # Yield latest versions of generator gems.
-      def each
-        dependency = Gem::Dependency.new(/_generator$/, Gem::Requirement.default)
-        Gem::cache.search(dependency).inject({}) { |latest, gem|
-          hem = latest[gem.name]
-          latest[gem.name] = gem if hem.nil? or gem.version > hem.version
-          latest
-        }.values.each { |gem|
-          yield Spec.new(gem.name.sub(/_generator$/, ''), gem.full_gem_path, label)
-        }
+    if Rails.enable_gem_handling?
+      # GemGeneratorSource hits the mines to quarry for generators.  The latest versions
+      # of gems named *_generator are selected.
+      class GemGeneratorSource < AbstractGemSource
+        # Yield latest versions of generator gems.
+        def each
+          dependency = Gem::Dependency.new(/_generator$/, Gem::Requirement.default)
+          Gem::cache.search(dependency).inject({}) { |latest, gem|
+            hem = latest[gem.name]
+            latest[gem.name] = gem if hem.nil? or gem.version > hem.version
+            latest
+          }.values.each { |gem|
+            yield Spec.new(gem.name.sub(/_generator$/, ''), gem.full_gem_path, label)
+          }
+        end
       end
     end
 
@@ -230,18 +232,23 @@ module Rails
 
       private
         def generator_full_paths
-          @generator_full_paths ||=
-            Gem::cache.inject({}) do |latest, name_gem|
-              name, gem = name_gem
-              hem = latest[gem.name]
-              latest[gem.name] = gem if hem.nil? or gem.version > hem.version
-              latest
-            end.values.inject([]) do |mem, gem|
-              Dir[gem.full_gem_path + '/{rails_,}generators/**/*_generator.rb'].each do |generator|
-                mem << generator
+          if Rails.enable_gem_handling?
+            @generator_full_paths ||=
+              Gem::cache.inject({}) do |latest, name_gem|
+                name, gem = name_gem
+                hem = latest[gem.name]
+                latest[gem.name] = gem if hem.nil? or gem.version > hem.version
+                latest
+              end.values.inject([]) do |mem, gem|
+                Dir[gem.full_gem_path + '/{rails_,}generators/**/*_generator.rb'].each do |generator|
+                  mem << generator
+                end
+                mem
               end
-              mem
-            end
+          else
+            @generator_full_paths ||=
+              Gem.find_files('/{rails_,}generators/**/*_generator.rb')
+          end
         end
     end
 

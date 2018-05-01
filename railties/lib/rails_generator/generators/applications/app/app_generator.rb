@@ -1,10 +1,15 @@
 require 'rbconfig'
 require File.dirname(__FILE__) + '/template_runner'
 require 'digest/md5' 
+require 'active_support'
 require 'active_support/secure_random'
 
 class AppGenerator < Rails::Generator::Base
-  DEFAULT_SHEBANG = File.join(Config::CONFIG['bindir'], Config::CONFIG['ruby_install_name'])
+  if ActiveSupport.modern_ruby?
+    DEFAULT_SHEBANG = File.join(RbConfig::CONFIG['bindir'], RbConfig::CONFIG['ruby_install_name'])
+  else
+    DEFAULT_SHEBANG = File.join(Config::CONFIG['bindir'], Config::CONFIG['ruby_install_name'])
+  end
 
   DATABASES        = %w( mysql oracle postgresql sqlite2 sqlite3 frontbase ibm_db )
   DEFAULT_DATABASE = 'sqlite3'

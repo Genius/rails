@@ -234,18 +234,18 @@ class WebServiceTest < ActionController::IntegrationTest
     with_test_route_set do
       ActionController::Base.param_parsers[Mime::YAML] = :yaml
       yaml = <<-YAML
-        ---
-        data:
-          a: 15
-          b: false
-          c: true
-          d: 2005-03-17
-          e: 2005-03-17T21:41:07Z
-          f: unparsed
-          g:
-            - 1
-            - hello
-            - 1974-07-25
+---
+data:
+  a: 15
+  b: false
+  c: true
+  d: 2005-03-17
+  e: 2005-03-17T21:41:07Z
+  f: unparsed
+  g:
+    - 1
+    - hello
+    - 1974-07-25
       YAML
       post "/", yaml, {'CONTENT_TYPE' => 'application/x-yaml'}
       params = @controller.params

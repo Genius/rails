@@ -35,8 +35,17 @@ module Rails
 
   class Boot
     def run
+      set_external_encoding
       load_initializer
       Rails::Initializer.run(:set_load_path)
+    end
+
+    private
+
+    def set_external_encoding
+      if defined?(Encoding.default_external)
+        Encoding.default_external = Encoding::UTF_8
+      end
     end
   end
 

@@ -55,8 +55,9 @@ class RailsGeneratorTest < Test::Unit::TestCase
   def test_sources
     expected = [:lib, :vendor,
                 "plugins (vendor/plugins)".to_sym, # <plugin>/generators and <plugin>/rails_generators
-                :user,
-                :RubyGems, :RubyGems, # gems named <x>_generator, gems containing /rails_generator/ folder
+                :user] +
+                (Rails.enable_gem_handling?  ? [:RubyGems] : []) + # gems named <x>_generator
+                [:RubyGems, # gems containing /rails_generator/ folder
                 :builtin]
     expected.delete(:RubyGems) unless Object.const_defined?(:Gem)
     assert_equal expected, Rails::Generator::Base.sources.map { |s| s.label }

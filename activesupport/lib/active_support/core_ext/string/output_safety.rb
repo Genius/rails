@@ -4,6 +4,11 @@ class ERB
   module Util
     HTML_ESCAPE = { '&' => '&amp;',  '>' => '&gt;',   '<' => '&lt;', '"' => '&quot;', "'" => '&#39;' }
     JSON_ESCAPE = { '&' => '\u0026', '>' => '\u003E', '<' => '\u003C' }
+    if defined?(::Encoding::US_ASCII)
+      REGEXP = Regexp.new(%([&"'><]), ::Encoding::US_ASCII)
+    else
+      REGEXP = /[&"'><]/n
+    end
 
     # A utility method for escaping HTML tag characters.
     # This method is also aliased as <tt>h</tt>.
@@ -19,7 +24,7 @@ class ERB
       if s.html_safe?
         s
       else
-        s.gsub(/[&"'><]/n) { |special| HTML_ESCAPE[special] }.html_safe
+        s.gsub(REGEXP) { |special| HTML_ESCAPE[special] }.html_safe
       end
     end
 

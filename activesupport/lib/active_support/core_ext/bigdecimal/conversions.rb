@@ -13,7 +13,9 @@ module ActiveSupport #:nodoc:
             alias_method :_original_to_s, :to_s
             alias_method :to_s, :to_formatted_s
 
-            yaml_as YAML_TAG
+            unless ActiveSupport.psych?
+              yaml_as YAML_TAG
+            end
           end
         end
 
@@ -25,10 +27,19 @@ module ActiveSupport #:nodoc:
         # This is better than self.to_f.to_s since it doesn't lose precision.
         #
         # Note that reconstituting YAML floats to native floats may lose precision.
-        def to_yaml(opts = {})
-          YAML.quick_emit(nil, opts) do |out|
+        if ActiveSupport.psych?
+          def encode_with(coder)
             string = to_s
-            out.scalar(YAML_TAG, YAML_MAPPING[string] || string, :plain)
+            coder.tag = nil
+            coder.style = :plain
+            coder.scalar = YAML_MAPPING[string] || string
+          end
+        else
+          def to_yaml(opts = {})
+            YAML.quick_emit(nil, opts) do |out|
+              string = to_s
+              out.scalar(YAML_TAG, YAML_MAPPING[string] || string, :plain)
+            end
           end
         end
       end

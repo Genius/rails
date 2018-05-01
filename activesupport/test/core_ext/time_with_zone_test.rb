@@ -96,12 +96,19 @@ class TimeWithZoneTest < Test::Unit::TestCase
     assert_equal "1999-12-31T19:00:00.123456-05:00", @twz.xmlschema(12)
   end
 
-  def test_to_yaml
-    assert_equal "--- 1999-12-31 19:00:00 -05:00\n", @twz.to_yaml
+  def test_yaml_dump_and_parse
+    assert_equal @twz, YAML.load(@twz.to_yaml)
   end
 
-  def test_ruby_to_yaml
-    assert_equal "--- \n:twz: 2000-01-01 00:00:00 Z\n", {:twz => @twz}.to_yaml
+  def test_to_yaml
+    assert_match(/--- 1999-12-31 19:00:00(\.0+)? -05:00\n/, @twz.to_yaml)
+  end
+
+  unless ActiveSupport.psych?
+    # this was a workaround that is no longer necessary
+    def test_ruby_to_yaml
+      assert_equal "--- \n:twz: 2000-01-01 00:00:00 Z\n", {:twz => @twz}.to_yaml
+    end
   end
 
   def test_httpdate

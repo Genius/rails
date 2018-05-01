@@ -64,8 +64,12 @@ module ActiveRecord
       # </ol>
       def generate_message(options = {})
         keys = @base.class.self_and_descendants_from_active_record.map do |klass|
-          [ :"models.#{klass.name.underscore}.attributes.#{attribute}.#{@message}",
-            :"models.#{klass.name.underscore}.#{@message}" ]
+          if (klass_name = klass.name)
+            [ :"models.#{klass_name.underscore}.attributes.#{attribute}.#{@message}",
+              :"models.#{klass_name.underscore}.#{@message}" ]
+          else
+            []
+          end
         end.flatten
 
         keys << options.delete(:default)
@@ -817,8 +821,8 @@ module ActiveRecord
             condition_sql = "#{sql_attribute} #{comparison_operator}"
             condition_params = [value]
           else
-            condition_sql = "LOWER(#{sql_attribute}) #{comparison_operator}"
-            condition_params = [value.mb_chars.downcase]
+            condition_sql = "LOWER(#{sql_attribute}) #{comparison_operator.sub('?', 'LOWER(?)')}"
+            condition_params = [value.to_s]
           end
 
           if scope = configuration[:scope]
@@ -1039,6 +1043,7 @@ module ActiveRecord
             raw_value = raw_value.to_i
           else
             begin
+              raise ArgumentError if raw_value.to_s =~ /\A\s*0x/ # new rubies allow this, but we don't want it for compatibility
               raw_value = Kernel.Float(raw_value)
             rescue ArgumentError, TypeError
               record.errors.add(attr_name, :not_a_number, :value => raw_value, :default => configuration[:message])
