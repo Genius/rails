@@ -4,4 +4,5 @@ $LOAD_PATH << File.join(File.dirname(__FILE__), '..', '..', '..', 'activesupport
 
 # premature optimization?
 # So far, we only need the string inflections and not the rest of ActiveSupport.
+require 'active_support/version_switches'
 require 'active_support/inflector'
