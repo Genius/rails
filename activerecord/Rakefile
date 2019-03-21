@@ -18,7 +18,11 @@ RELEASE_NAME  = "REL #{PKG_VERSION}"
 RUBY_FORGE_PROJECT = "activerecord"
 RUBY_FORGE_USER    = "webster132"
 
-MYSQL_DB_USER = 'rails'
+MYSQL_DB_USER = ENV['MYSQL_USER']
+MYSQL_DB_HOST = ENV['MYSQL_HOST']
+
+PG_DB_USER = ENV['PG_USER']
+PG_DB_HOST = ENV['PG_HOST']
 
 PKG_FILES = FileList[
     "lib/**/*", "test/**/*", "examples/**/*", "doc/**/*", "[A-Z]*", "install.rb", "Rakefile"
@@ -45,18 +49,21 @@ desc 'Run mysql, sqlite, and postgresql tests'
 task :test do
   tasks = defined?(JRUBY_VERSION) ?
     %w(test_jdbcmysql test_jdbcsqlite3 test_jdbcpostgresql) :
-    %w(test_mysql test_sqlite3 test_postgresql)
+    (
+      (Gem.loaded_specs.has_key?('mysql2') ? %w(test_mysql2) : %w(test_myql)) +
+      %w(test_sqlite3 test_postgresql)
+    )
   run_without_aborting(*tasks)
 end
 
-for adapter in %w( mysql postgresql sqlite sqlite3 firebird db2 oracle sybase openbase frontbase jdbcmysql jdbcpostgresql jdbcsqlite3 jdbcderby jdbch2 jdbchsqldb )
+for adapter in %w( mysql mysql2 postgresql sqlite sqlite3 firebird db2 oracle sybase openbase frontbase jdbcmysql jdbcpostgresql jdbcsqlite3 jdbcderby jdbch2 jdbchsqldb )
   Rake::TestTask.new("test_#{adapter}") { |t|
     if adapter =~ /jdbc/
       t.libs << "test" << "test/connections/jdbc_#{adapter}"
     else
       t.libs << "test" << "test/connections/native_#{adapter}"
     end
-    adapter_short = adapter == 'db2' ? adapter : adapter[/^[a-z]+/]
+    adapter_short = (adapter == 'db2' || adapter == 'mysql2') ? adapter : adapter[/^[a-z]+/]
     t.test_files=Dir.glob( "test/cases/**/*_test{,_#{adapter_short}}.rb" ).sort
     t.verbose = true
   }
@@ -69,14 +76,14 @@ end
 namespace :mysql do
   desc 'Build the MySQL test databases'
   task :build_databases do
-    %x( echo "create DATABASE activerecord_unittest DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_unicode_ci " | mysql --user=#{MYSQL_DB_USER})
-    %x( echo "create DATABASE activerecord_unittest2 DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_unicode_ci " | mysql --user=#{MYSQL_DB_USER})
+    %x( echo "create DATABASE activerecord_unittest DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_unicode_ci " | mysql --user=#{MYSQL_DB_USER} --host=#{MYSQL_DB_HOST})
+    %x( echo "create DATABASE activerecord_unittest2 DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_unicode_ci " | mysql --user=#{MYSQL_DB_USER} --host=#{MYSQL_DB_HOST})
   end
 
   desc 'Drop the MySQL test databases'
   task :drop_databases do
-    %x( mysqladmin --user=#{MYSQL_DB_USER} -f drop activerecord_unittest )
-    %x( mysqladmin --user=#{MYSQL_DB_USER} -f drop activerecord_unittest2 )
+    %x( mysqladmin --user=#{MYSQL_DB_USER} --host=#{MYSQL_DB_HOST} -f drop activerecord_unittest )
+    %x( mysqladmin --user=#{MYSQL_DB_USER} --host=#{MYSQL_DB_HOST} -f drop activerecord_unittest2 )
   end
 
   desc 'Rebuild the MySQL test databases'
@@ -89,16 +96,20 @@ task :rebuild_mysql_databases => 'mysql:rebuild_databases'
 
 
 namespace :postgresql do
+  def create_pg_db(db_name)
+    system('psql', '-h', PG_DB_HOST, '-U', PG_DB_USER, 'template1', '-c', %(CREATE DATABASE "#{db_name}" WITH TEMPLATE = "template0" ENCODING = 'UTF8' LC_COLLATE = 'en_US.utf8' LC_CTYPE = 'en_US.utf8'))
+  end
+
   desc 'Build the PostgreSQL test databases'
   task :build_databases do
-    %x( createdb -E UTF8 activerecord_unittest )
-    %x( createdb -E UTF8 activerecord_unittest2 )
+    create_pg_db('activerecord_unittest')
+    create_pg_db('activerecord_unittest2')
   end
 
   desc 'Drop the PostgreSQL test databases'
   task :drop_databases do
-    %x( dropdb activerecord_unittest )
-    %x( dropdb activerecord_unittest2 )
+    system('dropdb', '-h', PG_DB_HOST, '-U', PG_DB_USER, 'activerecord_unittest')
+    system('dropdb', '-h', PG_DB_HOST, '-U', PG_DB_USER, 'activerecord_unittest2')
   end
 
   desc 'Rebuild the PostgreSQL test databases'

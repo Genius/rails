@@ -47,7 +47,7 @@ class AdapterTest < ActiveRecord::TestCase
     end
   end
 
-  if current_adapter?(:MysqlAdapter)
+  if current_adapter?(:MysqlAdapter) || current_adapter?(:Mysql2Adapter)
     def test_charset
       assert_not_nil @connection.charset
       assert_not_equal 'character_set_database', @connection.charset
@@ -124,7 +124,7 @@ class AdapterTest < ActiveRecord::TestCase
   def test_add_limit_offset_should_sanitize_sql_injection_for_limit_without_comas
     sql_inject = "1 select * from schema"
       assert_equal " LIMIT 1", @connection.add_limit_offset!("", :limit=>sql_inject)
-    if current_adapter?(:MysqlAdapter)
+    if current_adapter?(:MysqlAdapter) || current_adapter?(:Mysql2Adapter)
       assert_equal " LIMIT 7, 1", @connection.add_limit_offset!("", :limit=>sql_inject, :offset=>7)
     else
       assert_equal " LIMIT 1 OFFSET 7", @connection.add_limit_offset!("", :limit=>sql_inject, :offset=>7)
@@ -133,7 +133,7 @@ class AdapterTest < ActiveRecord::TestCase
 
   def test_add_limit_offset_should_sanitize_sql_injection_for_limit_with_comas
     sql_inject = "1, 7 procedure help()"
-    if current_adapter?(:MysqlAdapter)
+    if current_adapter?(:MysqlAdapter) || current_adapter?(:Mysql2Adapter)
       assert_equal " LIMIT 1,7", @connection.add_limit_offset!("", :limit=>sql_inject)
       assert_equal " LIMIT 7, 1", @connection.add_limit_offset!("", :limit=> '1 ; DROP TABLE USERS', :offset=>7)
     else

@@ -37,6 +37,7 @@ module ActiveSupport #:nodoc:
           "Symbol"     => "symbol",
           "Fixnum"     => "integer",
           "Bignum"     => "integer",
+          "Integer"    => "integer",
           "BigDecimal" => "decimal",
           "Float"      => "float",
           "TrueClass"  => "boolean",

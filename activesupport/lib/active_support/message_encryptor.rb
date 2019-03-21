@@ -1,4 +1,5 @@
 require 'openssl'
+require 'active_support/deprecation'
 
 module ActiveSupport
   # MessageEncryptor is a simple way to encrypt values which get stored somewhere 
@@ -14,6 +15,11 @@ module ActiveSupport
 
     def initialize(secret, cipher = 'aes-256-cbc')
       @secret = secret
+      if RUBY_VERSION >= '2.4' && @secret.size > 32
+        # we don't crash, because on Ruby <= 2.3 truncation was also done by OpenSSL quietly
+        ActiveSupport::Deprecation.warn "secret is expected to be 32 bytes; truncating longer secret"
+        @secret = @secret[0, 32]
+      end
       @cipher = cipher
     end
     
@@ -60,7 +66,11 @@ module ActiveSupport
     
     private 
       def new_cipher
-        OpenSSL::Cipher::Cipher.new(@cipher)
+        if RUBY_VERSION >= '2.4'
+          OpenSSL::Cipher.new(@cipher)
+        else
+          OpenSSL::Cipher::Cipher.new(@cipher)
+        end
       end
       
       def verifier

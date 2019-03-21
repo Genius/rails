@@ -75,6 +75,12 @@ module ActiveSupport
       parts.to_sentence(:locale => :en)
     end
 
+    if ::RUBY_VERSION >= '2.4'
+      def coerce(other)
+        [other, to_i]
+      end
+    end
+
     protected
 
       def sum(sign, time = ::Time.current) #:nodoc:

@@ -10,14 +10,16 @@ ActiveRecord::Base.logger = Logger.new("debug.log")
 ActiveRecord::Base.configurations = {
   'arunit' => {
     :adapter  => 'mysql',
-    :username => 'rails',
+    :username => ENV['MYSQL_USER'],
     :encoding => 'utf8',
     :database => 'activerecord_unittest',
+    :host     => ENV['MYSQL_HOST'],
   },
   'arunit2' => {
     :adapter  => 'mysql',
-    :username => 'rails',
-    :database => 'activerecord_unittest2'
+    :username => ENV['MYSQL_USER'],
+    :database => 'activerecord_unittest2',
+    :host     => ENV['MYSQL_HOST'],
   }
 }
 

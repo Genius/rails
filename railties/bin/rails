@@ -12,6 +12,7 @@ end
 freeze   = ARGV.any? { |option| %w(--freeze -f).include?(option) }
 app_path = ARGV.first
 
+require 'lts_gem_handling'
 require 'rails_generator'
 require 'rails_generator/scripts/generate'
 

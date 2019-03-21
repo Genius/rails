@@ -107,6 +107,7 @@ module ActiveRecord
 
     class Scope
       attr_reader :proxy_scope, :proxy_options, :current_scoped_methods_when_defined
+      alias_method :_scope_protected_methods, :protected_methods
       NON_DELEGATE_METHODS = %w(nil? send object_id class extend find size count sum average maximum minimum paginate first last empty? any? respond_to?).to_set
       [].methods.each do |m|
         unless m =~ /^__/ || NON_DELEGATE_METHODS.include?(m.to_s)
@@ -155,7 +156,7 @@ module ActiveRecord
       end
 
       def respond_to?(method, include_private = false)
-        super || protected_methods.include?(method) || ActiveSupport.legacy_respond_to?(@proxy_scope, method, include_private)
+        super || _scope_protected_methods.include?(method) || ActiveSupport.legacy_respond_to?(@proxy_scope, method, include_private)
       end
 
       def any?

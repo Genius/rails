@@ -28,7 +28,9 @@ task :default => :test
 task :test do 
   successes = Dir['test/**/*_test.rb'].map do |file|
     ruby = File.join(*RbConfig::CONFIG.values_at('bindir', 'RUBY_INSTALL_NAME'))
-    system(ruby, '-Itest', file)
+    result = system(ruby, '-Itest', file)
+    puts "\e[31mFail in #{file}.\e[0m" unless result
+    result
   end
   unless successes.all?
     puts "\e[31mSome tests failed.\e[0m"

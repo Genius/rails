@@ -7,9 +7,9 @@ rescue LoadError, NameError
   $stderr.puts "Skipping MessageEncryptor test: broken OpenSSL install"
 else
 
-class MessageEncryptorTest < Test::Unit::TestCase
+class MessageEncryptorTest < ActiveSupport::TestCase
   def setup
-    @encryptor = ActiveSupport::MessageEncryptor.new(ActiveSupport::SecureRandom.hex(64))
+    @encryptor = ActiveSupport::MessageEncryptor.new(ActiveSupport::SecureRandom.random_bytes(32))
     @data = {:some=>"data", :now=>Time.now}
   end
   
@@ -26,7 +26,7 @@ class MessageEncryptorTest < Test::Unit::TestCase
   
   def test_messing_with_either_value_causes_failure
     text, iv = @encryptor.encrypt(@data).split("--")
-    assert_not_decrypted([iv, text] * "--")
+    assert_not_decrypted([iv, text] * "--") unless RUBY_VERSION >= "2.4"
     assert_not_decrypted([text, munge(iv)] * "--")
     assert_not_decrypted([munge(text), iv] * "--")
     assert_not_decrypted([munge(text), munge(iv)] * "--")
@@ -37,6 +37,22 @@ class MessageEncryptorTest < Test::Unit::TestCase
     assert_equal @data, @encryptor.decrypt_and_verify(message)
   end
   
+  if RUBY_VERSION >= '2.5'
+    def test_long_secret_is_deprecated
+      encryptor = nil
+      assert_deprecated do
+        encryptor = ActiveSupport::MessageEncryptor.new(ActiveSupport::SecureRandom.hex(64))
+      end
+      message = encryptor.encrypt(@data)
+      assert_equal @data, encryptor.decrypt(message)
+    end
+  else
+    def test_long_secret_is_accepted
+      encryptor = ActiveSupport::MessageEncryptor.new(ActiveSupport::SecureRandom.hex(64))
+      message = encryptor.encrypt(@data)
+      assert_equal @data, encryptor.decrypt(message)
+    end
+  end
   
   private
     def assert_not_decrypted(value)

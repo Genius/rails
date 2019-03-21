@@ -53,6 +53,7 @@ module ActiveSupport
 end
 
 require 'active_support/version_switches'
+require 'active_support/integer_class'
 require 'active_support/legacy_methods'
 require 'active_support/vendor'
 require 'active_support/core_ext'

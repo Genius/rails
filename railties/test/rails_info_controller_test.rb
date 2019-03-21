@@ -2,6 +2,8 @@ require 'abstract_unit'
 require 'action_controller'
 require 'action_controller/test_process'
 
+Rack::Session::Abstract::ID::DEFAULT_OPTIONS[:sidbits] = 32 # 128 causes a core dump on CI
+
 module Rails; end
 require 'rails/info'
 require 'rails/info_controller'

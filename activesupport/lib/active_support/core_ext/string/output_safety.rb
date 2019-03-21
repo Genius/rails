@@ -59,7 +59,7 @@ class Object
   end
 end
 
-class Fixnum
+ActiveSupport::IntegerClass.class_eval do
   def html_safe?
     true
   end
