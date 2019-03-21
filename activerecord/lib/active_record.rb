@@ -81,4 +81,4 @@ module ActiveRecord
 end
 
 I18n.load_path << File.dirname(__FILE__) + '/active_record/locale/en.yml'
-require 'rails2_ruby2'
+#require 'rails2_ruby2'
