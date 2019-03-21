@@ -2,7 +2,6 @@ language: ruby
 sudo: false
 script: 'ci/travis.rb'
 before_script:
-  - sudo apt-get update && sudo apt-get install libfcgi libfcgi-dev
   - bundle update
 cache: bundler
 rvm:
