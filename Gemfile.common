@@ -8,6 +8,10 @@ gem 'rack', '~> 1.4'
 gem 'memcache-client'
 gem 'fcgi'
 
+if RUBY_VERSION >= '2.0'
+  gem 'rails2_ruby2', :github => 'Genius/rails2_ruby2', :branch => 'chores/ruby25_upgrade'
+end
+
 if RUBY_VERSION >= '2.4'
   gem 'rake', '~> 10.4'
   gem 'pg'
