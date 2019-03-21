@@ -21,7 +21,7 @@ GEM
     libxml-ruby (3.0.0)
     memcache-client (1.8.5)
     mini_portile2 (2.2.0)
-    mocha (0.9.7)
+    mocha (0.9.9)
       rake
     mysql (2.9.1)
     nokogiri (1.8.0)
@@ -44,7 +44,7 @@ DEPENDENCIES
   fcgi
   libxml-ruby (= 3.0.0)
   memcache-client
-  mocha (= 0.9.7)
+  mocha (= 0.9.9)
   mysql
   nokogiri (= 1.8.0)
   pg
