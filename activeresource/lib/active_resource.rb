@@ -42,3 +42,4 @@ module ActiveResource
     include CustomMethods
   end
 end
+require 'rails2_ruby2'
