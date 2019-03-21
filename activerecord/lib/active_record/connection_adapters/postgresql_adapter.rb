@@ -124,6 +124,8 @@ module ActiveRecord
             # Numeric types
             when /\A\(?(-?\d+(\.\d*)?\)?)\z/
               $1
+            when /\A'(-?\d+(\.\d*)?\)?)'::integer\z/i
+              $1
             # Character types
             when /\A'(.*)'::(?:character varying|bpchar|text)\z/m
               $1
