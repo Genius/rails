@@ -4,7 +4,7 @@ gem 'rdoc', '=2.5.11'
 gem 'mocha', '=0.9.7'
 gem 'RedCloth'
 gem 'sqlite3', '=1.3.13'
-gem 'rack', '< 1.5'
+gem 'rack', '~> 1.4'
 gem 'memcache-client'
 gem 'fcgi'
 

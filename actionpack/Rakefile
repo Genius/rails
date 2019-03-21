@@ -83,7 +83,7 @@ spec = Gem::Specification.new do |s|
   s.requirements << 'none'
 
   s.add_dependency('activesupport', "= #{PKG_VERSION}")
-  s.add_dependency('rack', '< 1.5')
+  s.add_dependency('rack', '~> 1.4')
 
   s.require_path = 'lib'
   s.autorequire = 'action_controller'
