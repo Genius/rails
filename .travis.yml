@@ -4,18 +4,24 @@ script: 'ci/travis.rb'
 before_script:
   - bundle update
 cache: bundler
-env:
-  matrix:
-    - "GEM=railties"
-    - "GEM=ap"
-    - "GEM=am,amo,as"
-    - "GEM=ar:postgresql"
-gemfile:
-  - "Gemfile.1.8"
 rvm:
   - ree
+  - 2.3.8
+gemfile:
+  - Gemfile.1.8
+  - Gemfile.2.3
+env:
+  - "GEM=railties"
+  - "GEM=ap"
+  - "GEM=am,amo,as"
+  - "GEM=ar:postgresql"
 matrix:
   fast_finish: true
+  exclude:
+  - rvm: ree
+    gemfile: Gemfile.2.3
+  - rvm: 2.3.8
+    gemfile: Gemfile.1.8
 notifications:
   email: false
 bundler_args: --without test --jobs 3 --retry 3
