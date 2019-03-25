@@ -1167,6 +1167,28 @@ class RenderTest < ActionController::TestCase
     assert_equal "$(\"body\").visualEffect(\"highlight\");", @response.body
   end
 
+  def test_implicit_render_ignores_accept_header
+    Mime::Type.register("text/registered", :registered)
+    @request.accept = "text/registered"
+    get :greeting
+    assert_equal "<p>This is grand!</p>\n", @response.body
+  ensure
+    Mime.module_eval { remove_const :REGISTERED if const_defined?(:REGISTERED) }
+  end
+
+  def test_render_with_explicit_format_from_param_for_known_mime_type
+    Mime::Type.register("text/registered", :registered)
+    get :greeting, :format => 'registered'
+    assert_equal "Registered mime type!\n", @response.body
+  ensure
+    Mime.module_eval { remove_const :REGISTERED if const_defined?(:REGISTERED) }
+  end
+
+  def test_render_with_explicit_format_from_param_for_unknown_mime_type_falls_back_to_html
+    get :greeting, :format => 'unregistered'
+    assert_equal "<p>This is grand!</p>\n", @response.body
+  end
+
   def test_render_rjs_with_default
     get :delete_with_js
     assert_equal %!Element.remove("person");\nnew Effect.Highlight(\"project-4\",{});!, @response.body
