@@ -1,7 +1,7 @@
 GIT
   remote: git://github.com/Genius/rails2_ruby2.git
-  revision: 60976d2693f0e6f016eddbc041c53386a9686bbf
-  branch: chores/ruby25_upgrade
+  revision: 469226704ced5ea0a35c1484c224f0de88d1b5a6
+  branch: chores/postgresql_patches
   specs:
     rails2_ruby2 (0.1.0)
       iconv
