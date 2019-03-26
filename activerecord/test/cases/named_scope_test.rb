@@ -349,6 +349,13 @@ class NamedScopeTest < ActiveRecord::TestCase
       Comment.for_first_post.for_first_author.all
     end
   end
+
+  def test_respond_to_should_not_trigger_queries
+    assert_no_queries do
+      assert Topic.base.respond_to?(:approved)
+      assert !Topic.base.respond_to?(:foobar)
+    end
+  end
 end
 
 class DynamicScopeMatchTest < ActiveRecord::TestCase  

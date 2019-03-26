@@ -187,7 +187,7 @@ module ActionController
     def template_format
       parameter_format = parameters[:format]
 
-      if parameter_format
+      if parameter_format && Mime::Type.lookup_by_extension(parameter_format).symbol
         parameter_format
       elsif xhr?
         :js

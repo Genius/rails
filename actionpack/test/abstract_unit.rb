@@ -97,3 +97,5 @@ module RailsXssEmulation
 end
 
 ActionController::Reloader.default_lock = DummyMutex.new
+
+Rack::Session::Abstract::ID::DEFAULT_OPTIONS[:sidbits] = 32 # 128 causes a core dump on CI

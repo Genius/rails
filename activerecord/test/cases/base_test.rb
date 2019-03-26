@@ -160,9 +160,23 @@ class BasicsTest < ActiveRecord::TestCase
     end
   end
 
-  def test_read_attributes_before_type_cast_on_datetime
-    developer = Developer.find(:first)
-    assert_equal developer.created_at.to_s(:db) , developer.attributes_before_type_cast["created_at"]
+  if current_adapter?(:Mysql2Adapter)
+    def test_read_attributes_before_type_cast_on_boolean
+      bool = Booleantest.create({ "value" => false })
+      assert_equal 0, bool.reload.attributes_before_type_cast["value"]
+    end
+  end
+
+  if current_adapter?(:Mysql2Adapter)
+    def test_read_attributes_before_type_cast_on_datetime
+      developer = Developer.find(:first)
+      assert_equal developer.created_at, developer.attributes_before_type_cast["created_at"]
+    end
+  else
+    def test_read_attributes_before_type_cast_on_datetime
+      developer = Developer.find(:first)
+      assert_equal developer.created_at.to_s(:db) , developer.attributes_before_type_cast["created_at"]
+    end
   end
 
   def test_hash_content
@@ -663,7 +677,7 @@ class BasicsTest < ActiveRecord::TestCase
     assert_equal 0, WarehouseThing.find(1).value
   end
 
-  if current_adapter?(:MysqlAdapter)
+  if current_adapter?(:MysqlAdapter) || current_adapter?(:Mysql2Adapter)
     def test_update_all_with_order_and_limit
       assert_equal 1, Topic.update_all("content = 'bulk updated!'", nil, :limit => 1, :order => 'id DESC')
     end
@@ -1431,7 +1445,7 @@ class BasicsTest < ActiveRecord::TestCase
     assert_kind_of Integer, m1.world_population
     assert_equal 6000000000, m1.world_population
 
-    assert_kind_of Fixnum, m1.my_house_population
+    assert_kind_of ActiveSupport::IntegerClass, m1.my_house_population
     assert_equal 3, m1.my_house_population
 
     assert_kind_of BigDecimal, m1.bank_balance

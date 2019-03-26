@@ -178,7 +178,7 @@ class MemCacheStoreTest < ActionController::IntegrationTest
           end
         end
         
-        options = { :key => '_session_id' }.merge!(options)
+        options = { :key => '_session_id', :memcache_server => ENV.fetch('MEMCACHE_HOST', 'localhost') }.merge!(options)
         @integration_session = open_session(ActionController::Session::MemCacheStore.new(DispatcherApp, options))
         
         yield

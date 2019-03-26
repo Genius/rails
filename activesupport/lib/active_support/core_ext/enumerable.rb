@@ -118,3 +118,18 @@ module Enumerable
     !include?(object)
   end
 end
+
+
+if RUBY_VERSION >= "2.4"
+  class Array #:nodoc:
+    # Array#sum was added in Ruby 2.4 so it no longer inherits from Enumerable
+    # we still replace it with the Enumerable#sum implementation
+    def sum(identity = 0, &block)
+      if block_given?
+        map(&block).sum(identity)
+      else
+        inject { |sum, element| sum + element } || identity
+      end
+    end
+  end
+end

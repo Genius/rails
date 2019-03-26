@@ -1,6 +1,6 @@
 require 'abstract_unit'
 
-Bunny = Struct.new(:Bunny, :id)
+Bunny = Struct.new(:id)
 
 class Author
   attr_reader :id
@@ -391,12 +391,18 @@ Element.update("baz", "\\u003Cp\\u003EThis is a test\\u003C/p\\u003E");
   end
 
   def test_element_access
-    assert_equal %($("hello");), @generator['hello']
+    @generator['hello']
+    assert_equal %($("hello")), @generator.to_s
   end
 
-  def test_element_access_on_records
-    assert_equal %($("bunny_5");),   @generator[Bunny.new(:id => 5)]
-    assert_equal %($("new_bunny");), @generator[Bunny.new]
+  def test_element_access_on_records_with_id
+    @generator[Bunny.new(5)]
+    assert_equal %($("bunny_5")),   @generator.to_s
+  end
+
+  def test_element_access_on_records_without_id
+    @generator[Bunny.new]
+    assert_equal %($("new_bunny")), @generator.to_s
   end
 
   def test_element_proxy_one_deep
@@ -425,7 +431,8 @@ Element.update("baz", "\\u003Cp\\u003EThis is a test\\u003C/p\\u003E");
   end
 
   def test_select_access
-    assert_equal %($$("div.hello");), @generator.select('div.hello')
+    @generator.select('div.hello')
+    assert_equal %($$("div.hello")), @generator.to_s
   end
 
   def test_select_proxy_one_deep

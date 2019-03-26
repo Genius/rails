@@ -141,3 +141,11 @@ module ActiveSupport #:nodoc:
     end
   end
 end
+
+if RUBY_VERSION >= "2.5"
+  # ruby 2.5 defines Hash#slice, but that version does not work with HashWithIndifferentAccess
+  require 'active_support/core_ext/hash/slice'
+  class HashWithIndifferentAccess
+    prepend ActiveSupport::CoreExtensions::Hash::Slice
+  end
+end

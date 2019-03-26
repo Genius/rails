@@ -180,7 +180,7 @@ end
 uses_memcached 'memcached backed store' do
   class MemCacheStoreTest < ActiveSupport::TestCase
     def setup
-      @cache = ActiveSupport::Cache.lookup_store(:mem_cache_store)
+      @cache = ActiveSupport::Cache.lookup_store(:mem_cache_store, ENV.fetch('MEMCACHE_HOST', 'localhost'))
       @data = @cache.instance_variable_get(:@data)
       @cache.clear
       @cache.silence!
@@ -327,7 +327,7 @@ uses_memcached 'memcached backed store' do
 
   class CompressedMemCacheStore < ActiveSupport::TestCase
     def setup
-      @cache = ActiveSupport::Cache.lookup_store(:compressed_mem_cache_store)
+      @cache = ActiveSupport::Cache.lookup_store(:compressed_mem_cache_store, ENV.fetch('MEMCACHE_HOST', 'localhost'))
       @cache.clear
     end
 

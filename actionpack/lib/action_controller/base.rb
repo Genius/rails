@@ -1330,7 +1330,7 @@ module ActionController #:nodoc:
       end
 
       def log_processing_for_parameters
-        parameters = respond_to?(:filter_parameters) ? filter_parameters(params) : params.dup
+        parameters = respond_to?(:filter_parameters, true) ? filter_parameters(params) : params.dup
         parameters = parameters.except!(:controller, :action, :format, :_method)
 
         logger.info "  Parameters: #{parameters.inspect}" unless parameters.empty?

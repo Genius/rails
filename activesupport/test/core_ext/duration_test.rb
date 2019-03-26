@@ -111,6 +111,11 @@ class DurationTest < ActiveSupport::TestCase
     Time.zone_default = nil
   end
 
+  def test_implicit_coercion
+    assert_same 12.days.to_i, 4 * 3.days
+    assert_same 3.days.to_i + 4, 4 + 3.days
+  end
+
   protected
     def with_env_tz(new_tz = 'US/Eastern')
       old_tz, ENV['TZ'] = ENV['TZ'], new_tz

@@ -19,6 +19,38 @@ run = lambda { |command|
   true
 }
 
+class TestRunner
+  def initialize
+    @failures = []
+    yield(self)
+    summary
+  end
+
+  def run(name, command)
+    puts '', "\033[44m#{name}\033[0m", ''
+    puts "\e[35m#{command}\e[0m"
+    unless system(command)
+      STDERR.puts "\e[31mFailures testing #{name}.\e[0m"
+      @failures << name
+    end
+  end
+
+  private
+
+  def summary
+    if @failures.empty?
+      puts
+      puts "\e[32mAll tests passed.\e[0m"
+    else
+      puts
+      puts "\e[31mThe following tests failed:"
+      @failures.each { |f| puts f }
+      puts "\e[0m"
+      exit(1)
+    end
+  end
+end
+
 rails_gemspec = eval(File.read('rails.gemspec'))
 Gem::PackageTask.new(rails_gemspec) do |p|
   p.gem_spec = rails_gemspec
@@ -29,33 +61,31 @@ namespace :railslts do
   desc 'Run tests for Rails LTS compatibility'
   task :test do
 
-    puts '', "\033[44m#{'activesupport'}\033[0m", ''
-    run.call('cd activesupport && rake test')
+    TestRunner.new do |runner|
 
-    puts '', "\033[44m#{'actionmailer'}\033[0m", ''
-    run.call('cd actionmailer && rake test')
+      runner.run('activesupport', 'cd activesupport && rake test')
 
-    puts '', "\033[44m#{'actionpack'}\033[0m", ''
-    run.call('cd actionpack && rake test')
+      runner.run('actionmailer', 'cd actionmailer && rake test')
 
-    puts '', "\033[44m#{'activerecord (mysql)'}\033[0m", ''
-    run.call('cd activerecord && rake test_mysql')
+      runner.run('actionpack', 'cd actionpack && rake test')
 
-    puts '', "\033[44m#{'activerecord (sqlite3)'}\033[0m", ''
-    run.call('cd activerecord && rake test_sqlite3')
+      if Gem.loaded_specs.has_key?('mysql2')
+        runner.run('activerecord (mysql2)', 'cd activerecord && rake mysql:rebuild_databases test_mysql2')
+      else
+        runner.run('activerecord (mysql)', 'cd activerecord && rake mysql:rebuild_databases test_mysql')
+      end
 
-    puts '', "\033[44m#{'activerecord (postgres)'}\033[0m", ''
-    run.call('cd activerecord && rake test_postgresql')
+      runner.run('activerecord (sqlite3)', 'cd activerecord && rake test_sqlite3')
 
-    puts '', "\033[44m#{'activeresource'}\033[0m", ''
-    run.call('cd activeresource && rake test')
+      runner.run('activerecord (postgres)', 'cd activerecord && rake postgresql:rebuild_databases test_postgresql')
 
-    puts '', "\033[44m#{'railties'}\033[0m", ''
-    run.call('cd railties && rake test')
+      runner.run('activeresource', 'cd activeresource && rake test')
 
-    puts '', "\033[44m#{'railslts-version'}\033[0m", ''
-    run.call('cd railslts-version && rake test')
+      runner.run('railties', 'cd railties && rake test')
 
+      runner.run('railslts-version', 'cd railslts-version && rake test')
+
+    end
   end
 
   namespace :gems do

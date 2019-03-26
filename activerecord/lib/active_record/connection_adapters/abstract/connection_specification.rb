@@ -75,6 +75,10 @@ module ActiveRecord
             rescue LoadError
               raise "Please install the #{spec[:adapter]} adapter: `gem install activerecord-#{spec[:adapter]}-adapter` (#{$!})"
             end
+          ensure
+            if spec[:adapter] == 'mysql2' && defined?(ConnectionAdapters::Mysql2Adapter) && RUBY_VERSION >= '2.4' && !defined?(ConnectionAdapters::Mysql2Adapter::Fixnum)
+              ConnectionAdapters::Mysql2Adapter.const_set(:Fixnum, ::Integer)
+            end
           end
 
           adapter_method = "#{spec[:adapter]}_connection"

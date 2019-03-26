@@ -8,6 +8,8 @@
 # If the Builder::XChar module is not currently defined, fail on any
 # name clashes in standard library classes.
 
+integer_class = RUBY_VERSION >= '2.4' ? Integer : Fixnum
+
 module Builder
   def self.check_for_name_collision(klass, method_name, defined_constant=nil)
     if klass.instance_methods.include?(method_name.to_s)
@@ -19,7 +21,7 @@ end
 
 if ! defined?(Builder::XChar)
   Builder.check_for_name_collision(String, "to_xs")
-  Builder.check_for_name_collision(Fixnum, "xchr")
+  Builder.check_for_name_collision(integer_class, "xchr")
 end
 
 ######################################################################
@@ -86,7 +88,7 @@ end
 ######################################################################
 # Enhance the Fixnum class with a XML escaped character conversion.
 #
-class Fixnum
+integer_class.class_eval do
   XChar = Builder::XChar if ! defined?(XChar)
 
   # XML escaped version of chr

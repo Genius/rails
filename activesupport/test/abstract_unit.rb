@@ -10,7 +10,7 @@ require 'active_support/test_case'
 
 def uses_memcached(test_name)
   require 'memcache'
-  MemCache.new('localhost').stats
+  MemCache.new(ENV.fetch('MEMCACHE_HOST', 'localhost')).stats
   yield
 rescue MemCache::MemCacheError
   $stderr.puts "Skipping #{test_name} tests. Start memcached and try again."

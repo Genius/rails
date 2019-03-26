@@ -10,6 +10,8 @@ env:
     - "GEM=ap"
     - "GEM=am,amo,as"
     - "GEM=ar:postgresql"
+gemfile:
+  - "Gemfile.1.8"
 rvm:
   - ree
 matrix:

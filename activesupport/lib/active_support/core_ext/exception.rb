@@ -1,5 +1,7 @@
 module ActiveSupport
-  if RUBY_VERSION >= '1.9'
+  if defined?(FrozenError)
+    FrozenObjectError = FrozenError
+  elsif RUBY_VERSION >= '1.9'
     FrozenObjectError = RuntimeError
   else
     FrozenObjectError = TypeError

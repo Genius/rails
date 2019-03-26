@@ -148,6 +148,12 @@ class RespondToController < ActionController::Base
     Mime.module_eval { remove_const :IPHONE if const_defined?(:IPHONE) }
   end
 
+  def handle_any_with_template
+    respond_to do |type|
+      type.any { render 'any_template' }
+    end
+  end
+
   def rescue_action(e)
     raise
   end
@@ -470,6 +476,18 @@ class MimeControllerTest < ActionController::TestCase
 
     @request.accept = "text/iphone"
     assert_raise(ActionView::MissingTemplate) { get :iphone_with_html_response_type_without_layout }
+  end
+
+  def test_any_format_accepts_only_predefined_mime_types
+    Mime::Type.register("text/registered", :registered)
+    @request.accept = 'text/registered'
+    get :handle_any_with_template
+    assert_equal "Hello from registered format 'text/registered'.\n", @response.body
+
+    @request.accept = 'unregistered'
+    assert_raise(ActionView::MissingTemplate) { get :handle_any_with_template }
+  ensure
+    Mime.module_eval { remove_const :REGISTERED if const_defined?(:REGISTERED) }
   end
 end
 
