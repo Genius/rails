@@ -1,12 +1,3 @@
-GIT
-  remote: git://github.com/Genius/rails2_ruby2.git
-  revision: 54c483e22a9c7d1eb26dd835ea44d770a1e1f8f5
-  branch: chores/postgresql_patches
-  specs:
-    rails2_ruby2 (0.1.0)
-      iconv
-      syck (~> 1.4)
-
 PATH
   remote: railslts-version
   specs:
@@ -29,6 +20,9 @@ GEM
     pg (0.21.0)
     power_assert (0.2.6)
     rack (1.6)
+    rails2_ruby2 (1.0.0)
+      iconv
+      syck (~> 1.4)
     rake (10.5.0)
     rdoc (2.5.11)
     sqlite3 (1.3.13)
@@ -49,7 +43,7 @@ DEPENDENCIES
   nokogiri (= 1.8.0)
   pg
   rack (~> 1.4)
-  rails2_ruby2!
+  rails2_ruby2 (~> 1.0)
   railslts-version!
   rake (~> 10.4)
   rdoc (= 2.5.11)

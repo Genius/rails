@@ -9,7 +9,7 @@ gem 'memcache-client'
 gem 'fcgi'
 
 if RUBY_VERSION >= '2.0'
-  gem 'rails2_ruby2', :github => 'Genius/rails2_ruby2', :branch => 'chores/postgresql_patches'
+  gem 'rails2_ruby2', '~>1.0'
 end
 
 if RUBY_VERSION >= '2.4'
