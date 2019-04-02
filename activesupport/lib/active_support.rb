@@ -62,3 +62,4 @@ require 'active_support/dependencies'
 require 'active_support/json'
 
 I18n.load_path << "#{File.dirname(__FILE__)}/active_support/locale/en.yml"
+require 'rails2_ruby2/active_support'

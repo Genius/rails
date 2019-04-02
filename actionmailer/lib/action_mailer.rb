@@ -60,3 +60,4 @@ end
 autoload :MailHelper, 'action_mailer/mail_helper'
 
 require 'action_mailer/vendor/tmail'
+require 'rails2_ruby2/action_mailer'

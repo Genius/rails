@@ -83,13 +83,13 @@ class CookieTest < ActionController::TestCase
 
   def test_setting_cookie_for_fourteen_days
     get :authenticate_for_fourteen_days
-    assert_equal ["user_name=david; path=/; expires=Mon, 10-Oct-2005 05:00:00 GMT"], @response.headers["Set-Cookie"]
+    assert_equal ["user_name=david; path=/; expires=Mon, 10 Oct 2005 05:00:00 -0000"], @response.headers["Set-Cookie"]
     assert_equal({"user_name" => "david"}, @response.cookies)
   end
 
   def test_setting_cookie_for_fourteen_days_with_symbols
     get :authenticate_for_fourteen_days_with_symbols
-    assert_equal ["user_name=david; path=/; expires=Mon, 10-Oct-2005 05:00:00 GMT"], @response.headers["Set-Cookie"]
+    assert_equal ["user_name=david; path=/; expires=Mon, 10 Oct 2005 05:00:00 -0000"], @response.headers["Set-Cookie"]
     assert_equal({"user_name" => "david"}, @response.cookies)
   end
 
@@ -123,7 +123,7 @@ class CookieTest < ActionController::TestCase
   def test_multiple_cookies
     get :set_multiple_cookies
     assert_equal 2, @response.cookies.size
-    assert_equal "user_name=david; path=/; expires=Mon, 10-Oct-2005 05:00:00 GMT\n", @response.headers["Set-Cookie"][0]
+    assert_equal "user_name=david; path=/; expires=Mon, 10 Oct 2005 05:00:00 -0000\n", @response.headers["Set-Cookie"][0]
     assert_equal "login=XJ-122; path=/", @response.headers["Set-Cookie"][1]
     assert_equal({"login" => "XJ-122", "user_name" => "david"}, @response.cookies)
   end
@@ -134,7 +134,7 @@ class CookieTest < ActionController::TestCase
 
   def test_expiring_cookie
     get :logout
-    assert_equal ["user_name=; path=/; expires=Thu, 01-Jan-1970 00:00:00 GMT"], @response.headers["Set-Cookie"]
+    assert_equal ["user_name=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 -0000"], @response.headers["Set-Cookie"]
     assert_equal({"user_name" => nil}, @response.cookies)
   end
 
@@ -162,7 +162,7 @@ class CookieTest < ActionController::TestCase
 
   def test_delete_cookie_with_path
     get :delete_cookie_with_path
-    assert_equal ["user_name=; path=/beaten; expires=Thu, 01-Jan-1970 00:00:00 GMT"], @response.headers["Set-Cookie"]
+    assert_equal ["user_name=; path=/beaten; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 -0000"], @response.headers["Set-Cookie"]
   end
 
   def test_cookies_persist_throughout_request
