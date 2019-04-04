@@ -112,3 +112,4 @@ autoload :Mime, 'action_controller/mime_type'
 autoload :HTML, 'action_controller/vendor/html-scanner'
 
 require 'action_view'
+require 'rails2_ruby2/action_controller'
