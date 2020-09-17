@@ -31,5 +31,5 @@ addons:
     - postgresql-client-10
 before_install:
   - sudo apt-get update && sudo apt-get install libfcgi libfcgi-dev
-  - gem update --system 1.8.25
+  - gem update --system
   - gem --version
