@@ -1,39 +1,22 @@
-class MissingSourceFile < LoadError #:nodoc:
-  attr_reader :path
-  def initialize(message, path)
-    super(message)
-    @path = path
-  end
-
-  def is_missing?(path)
-    path.gsub(/\.rb$/, '') == self.path.gsub(/\.rb$/, '')
-  end
-
-  def self.from_message(message)
-    REGEXPS.each do |regexp, capture|
-      match = regexp.match(message)
-      return MissingSourceFile.new(message, match[capture]) unless match.nil?
-    end
-    nil
-  end
-
+class LoadError
   REGEXPS = [
-    [/^cannot load such file -- (.+)$/i, 1],
-    [/^no such file to load -- (.+)$/i, 1],
-    [/^Missing \w+ (file\s*)?([^\s]+.rb)$/i, 2],
-    [/^Missing API definition file in (.+)$/i, 1]
-  ] unless defined?(REGEXPS)
-end
+    /^no such file to load -- (.+)$/i,
+    /^Missing \w+ (?:file\s*)?([^\s]+.rb)$/i,
+    /^Missing API definition file in (.+)$/i,
+  ]
 
-module ActiveSupport #:nodoc:
-  module CoreExtensions #:nodoc:
-    module LoadErrorExtensions #:nodoc:
-      module LoadErrorClassMethods #:nodoc:
-        def new(*args)
-          (self == LoadError && MissingSourceFile.from_message(args.first)) || super
-        end
+  def path
+    @path ||= begin
+      REGEXPS.find do |regex|
+        message =~ regex
       end
-      ::LoadError.extend(LoadErrorClassMethods)
+      $1
     end
   end
+
+  def is_missing?(location)
+    location.sub(/\.rb$/, '') == path.sub(/\.rb$/, '')
+  end
 end
+
+MissingSourceFile = LoadError
