@@ -6,9 +6,9 @@ before_script:
   - bundle update
 cache: bundler
 rvm:
-  - 2.3.8
+  - 2.6.8
 gemfile:
-  - Gemfile.2.3
+  - Gemfile.2.6
 env:
   - "GEM=railties"
   - "GEM=ap"
