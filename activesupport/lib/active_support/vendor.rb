@@ -14,7 +14,7 @@ rescue Gem::LoadError
   $:.unshift "#{File.dirname(__FILE__)}/vendor/memcache-client-1.7.4"
 end
 
-tzinfo_version = ActiveSupport.modern_ruby? ? '0.3.53' : '0.3.12'
+tzinfo_version = ActiveSupport.modern_ruby? ? '0.3.61' : '0.3.12'
 begin
   gem 'tzinfo', "~> #{tzinfo_version}"
 rescue Gem::LoadError
