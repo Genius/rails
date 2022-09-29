@@ -266,10 +266,7 @@ module ActiveRecord
 
       # Enable standard-conforming strings if available.
       def set_standard_conforming_strings
-        old, self.client_min_messages = client_min_messages, 'panic'
-        execute('SET standard_conforming_strings = on') rescue nil
-      ensure
-        self.client_min_messages = old
+        execute('SET standard_conforming_strings = on', 'SCHEMA')
       end
 
       def supports_insert_with_returning?
@@ -750,7 +747,7 @@ module ActiveRecord
       def pk_and_sequence_for(table) #:nodoc:
         # First try looking for a sequence with a dependency on the
         # given table's primary key.
-        result = query(<<-end_sql, 'PK and serial sequence')[0]
+        result = query(<<-end_sql, 'SCHEMA')[0]
           SELECT attr.attname, seq.relname
           FROM pg_class      seq,
                pg_attribute  attr,
@@ -768,16 +765,13 @@ module ActiveRecord
         end_sql
 
         if result.nil? or result.empty?
-          # If that fails, try parsing the primary key's default value.
-          # Support the 7.x and 8.0 nextval('foo'::text) as well as
-          # the 8.1+ nextval('foo'::regclass).
-          result = query(<<-end_sql, 'PK and custom sequence')[0]
+          result = query(<<-end_sql, 'SCHEMA')[0]
             SELECT attr.attname,
               CASE
-                WHEN split_part(def.adsrc, '''', 2) ~ '.' THEN
-                  substr(split_part(def.adsrc, '''', 2),
-                         strpos(split_part(def.adsrc, '''', 2), '.')+1)
-                ELSE split_part(def.adsrc, '''', 2)
+                WHEN split_part(pg_get_expr(def.adbin, def.adrelid), '''', 2) ~ '.' THEN
+                  substr(split_part(pg_get_expr(def.adbin, def.adrelid), '''', 2),
+                         strpos(split_part(pg_get_expr(def.adbin, def.adrelid), '''', 2), '.')+1)
+                ELSE split_part(pg_get_expr(def.adbin, def.adrelid), '''', 2)
               END
             FROM pg_class       t
             JOIN pg_attribute   attr ON (t.oid = attrelid)
@@ -785,7 +779,7 @@ module ActiveRecord
             JOIN pg_constraint  cons ON (conrelid = adrelid AND adnum = conkey[1])
             WHERE t.oid = '#{quote_table_name(table)}'::regclass
               AND cons.contype = 'p'
-              AND def.adsrc ~* 'nextval'
+              AND pg_get_expr(def.adbin, def.adrelid) ~* 'nextval'
           end_sql
         end
 
@@ -1057,7 +1051,7 @@ module ActiveRecord
         #  - ::regclass is a function that gives the id for a table name
         def column_definitions(table_name) #:nodoc:
           query <<-end_sql
-            SELECT a.attname, format_type(a.atttypid, a.atttypmod), d.adsrc, a.attnotnull
+            SELECT a.attname, format_type(a.atttypid, a.atttypmod), pg_get_expr(d.adbin, d.adrelid), a.attnotnull
               FROM pg_attribute a LEFT JOIN pg_attrdef d
                 ON a.attrelid = d.adrelid AND a.attnum = d.adnum
              WHERE a.attrelid = '#{quote_table_name(table_name)}'::regclass
