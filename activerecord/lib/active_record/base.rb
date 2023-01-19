@@ -524,6 +524,14 @@ module ActiveRecord #:nodoc:
     class_inheritable_accessor :default_scoping, :instance_writer => false
     self.default_scoping = []
 
+    ##
+    # :singleton-method:
+    # Application configurable boolean that denotes whether or not to raise
+    # an exception when the PostgreSQLAdapter is provided with an integer that is
+    # wider than signed 64bit representation
+    cattr_accessor :raise_int_wider_than_64bit, :instance_writer => false
+    @@raise_int_wider_than_64bit = true
+
     class << self # Class methods
       # Find operates with four different retrieval approaches:
       #

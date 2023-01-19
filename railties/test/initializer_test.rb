@@ -436,3 +436,26 @@ class RailsRootTest < Test::Unit::TestCase
   end
 end
 
+class ActiveRecordPostgresSettingsTest < Test::Unit::TestCase
+  def setup
+    @config = Rails::Configuration.new
+    @config.frameworks = [:active_record]
+    @raise_int_wider_than_64bit = ActiveRecord::Base.raise_int_wider_than_64bit
+  end
+
+  def teardown
+    ActiveRecord::Base.raise_int_wider_than_64bit = @raise_int_wider_than_64bit
+  end
+
+  def test_raise_int_wider_than_64bit_is_true_by_default
+    Rails::Initializer.run(:initialize_framework_settings, @config)
+    assert ActiveRecord::Base.raise_int_wider_than_64bit
+  end
+
+  def test_raise_int_wider_than_64bit_can_be_configured
+    @config.active_record.raise_int_wider_than_64bit = false
+
+    Rails::Initializer.run(:initialize_framework_settings, @config)
+    assert !ActiveRecord::Base.raise_int_wider_than_64bit
+  end
+end

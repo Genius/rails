@@ -186,6 +186,12 @@ module ActiveRecord
     # * <tt>:min_messages</tt> - An optional client min messages that is used in a <tt>SET client_min_messages TO <min_messages></tt> call on the connection.
     # * <tt>:allow_concurrency</tt> - If true, use async query methods so Ruby threads don't deadlock; otherwise, use blocking query methods.
     class PostgreSQLAdapter < AbstractAdapter
+      class IntegerOutOf64BitRange < StandardError
+        def initialize(msg)
+          super(msg)
+        end
+      end
+
       ADAPTER_NAME = 'PostgreSQL'.freeze
       # get rid of deprecation warnings
       PGconn = defined?(::PG::Connection) ? ::PG::Connection : ::PGconn
@@ -341,8 +347,28 @@ module ActiveRecord
         unescape_bytea(original_value)
       end
 
+      def check_int_in_range(value)
+        if value.to_int > 9223372036854775807 || value.to_int < -9223372036854775808
+          exception = <<-ERROR
+            Provided value outside of the range of a signed 64bit integer.
+
+            PostgreSQL will treat the column type in question as a numeric.
+            This may result in a slow sequential scan due to a comparison
+            being performed between an integer or bigint value and a numeric value.
+
+            To allow for this potentially unwanted behavior, set
+            ActiveRecord::Base.raise_int_wider_than_64bit to false.
+          ERROR
+          raise IntegerOutOf64BitRange.new exception
+        end
+      end
+
       # Quotes PostgreSQL-specific data types for SQL input.
       def quote(value, column = nil) #:nodoc:
+        if ActiveRecord::Base.raise_int_wider_than_64bit && value.is_a?(Integer)
+          check_int_in_range(value)
+        end
+
         if value.kind_of?(String) && column && column.type == :binary
           "'#{escape_bytea(value)}'"
         elsif value.kind_of?(String) && column && column.sql_type == 'xml'
