@@ -77,6 +77,9 @@ module ActionController #:nodoc:
   class UnknownHttpMethod < ActionControllerError #:nodoc:
   end
 
+  class UnsafeRedirectError < ActionControllerError #:nodoc:
+  end
+
   # Action Controllers are the core of a web request in Rails. They are made up of one or more actions that are executed
   # on request and then either render a template or redirect to another action. An action is defined as a public method
   # on the controller, which will automatically be made accessible to the web-server through Rails Routes.
@@ -248,6 +251,7 @@ module ActionController #:nodoc:
   #
   class Base
     DEFAULT_RENDER_STATUS_CODE = "200 OK"
+    ILLEGAL_HEADER_VALUE_REGEX = /[\x00-\x08\x0A-\x1F]/.freeze
 
     include StatusCodes
 
@@ -1139,6 +1143,8 @@ module ActionController #:nodoc:
 
       def redirect_to_full_url(url, status)
         raise DoubleRenderError if performed?
+        ensure_url_is_http_header_safe(url)
+
         logger.info("Redirected to #{url}") if logger && logger.info?
         response.redirect(url, interpret_status(status))
         @performed_redirect = true
@@ -1426,6 +1432,17 @@ module ActionController #:nodoc:
       end
 
       def process_cleanup
+      end
+
+      def ensure_url_is_http_header_safe(url)
+        # Attempt to comply with the set of valid token characters
+        # defined for an HTTP header value in
+        # https://datatracker.ietf.org/doc/html/rfc7230#section-3.2.6
+        if url.match(ILLEGAL_HEADER_VALUE_REGEX)
+          msg = "The redirect URL #{url} contains one or more illegal HTTP header field character. " \
+            "Set of legal characters defined in https://datatracker.ietf.org/doc/html/rfc7230#section-3.2.6"
+          raise UnsafeRedirectError, msg
+        end
       end
   end
 
