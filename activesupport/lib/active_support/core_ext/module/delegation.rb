@@ -96,11 +96,8 @@ class Module
   #
   #  Foo.new.zoo   # returns nil
   #
-  def delegate(*methods)
-    options = methods.pop
-    unless options.is_a?(Hash) && to = options[:to]
-      raise ArgumentError, "Delegation needs a target. Supply an options hash with a :to key as the last argument (e.g. delegate :hello, :to => :greeter)."
-    end
+  def delegate(*methods, **options)
+    to = options[:to]
 
     if options[:prefix] == true && options[:to].to_s =~ /^[^a-z_]/
       raise ArgumentError, "Can only automatically set the delegation prefix when delegating to a method."
@@ -120,8 +117,8 @@ class Module
         end
 
       module_eval(<<-EOS, file, line)
-        def #{prefix}#{method}(*args, &block)               # def customer_name(*args, &block)
-          #{to}.__send__(#{method.inspect}, *args, &block)  #   client.__send__(:name, *args, &block)
+        def #{prefix}#{method}(...)               # def customer_name(...)
+          #{to}.__send__(#{method.inspect}, ...)  #   client.__send__(:name, ...)
         rescue NoMethodError                                # rescue NoMethodError
           if #{to}.nil?                                     #   if client.nil?
             #{on_nil}
