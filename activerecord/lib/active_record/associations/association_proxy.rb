@@ -214,10 +214,10 @@ module ActiveRecord
 
       private
         # Forwards any missing method call to the \target.
-        def method_missing(method, *args, **kargs, &block)
+        def method_missing(method, ...)
           if load_target
             if ActiveSupport.legacy_respond_to?(@target, method)
-              @target.send(method, *args, **kargs, &block)
+              @target.send(method, ...)
             else
               super
             end
