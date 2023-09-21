@@ -97,7 +97,9 @@ class Module
   #  Foo.new.zoo   # returns nil
   #
   def delegate(*methods, **options)
-    to = options[:to]
+    unless to = options[:to]
+      raise ArgumentError, "Delegation needs a target. Supply an options hash with a :to key as the last argument (e.g. delegate :hello, :to => :greeter)."
+    end
 
     if options[:prefix] == true && options[:to].to_s =~ /^[^a-z_]/
       raise ArgumentError, "Can only automatically set the delegation prefix when delegating to a method."
