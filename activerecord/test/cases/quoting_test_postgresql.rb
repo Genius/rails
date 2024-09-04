@@ -7,6 +7,7 @@ module ActiveRecord
       class QuotingTest < ActiveRecord::TestCase
         def setup
           @conn = ActiveRecord::Base.connection
+          @raise_int_wider_than_64bit = ActiveRecord::Base.raise_int_wider_than_64bit
         end
 
         def test_quote_true
@@ -39,6 +40,33 @@ module ActiveRecord
         def test_quote_bit_string
           c = PostgreSQLColumn.new(nil, 1, 'bit')
           assert_equal nil, @conn.quote("'); SELECT * FORM users; /*\n01\n*/--", c)
+        end
+
+        def test_raise_when_int_is_wider_than_64bit
+          value = 9223372036854775807 + 1
+          assert_raise ActiveRecord::ConnectionAdapters::PostgreSQLAdapter::IntegerOutOf64BitRange do
+            @conn.quote(value)
+          end
+
+          value = -9223372036854775808 - 1
+          assert_raise ActiveRecord::ConnectionAdapters::PostgreSQLAdapter::IntegerOutOf64BitRange do
+            @conn.quote(value)
+          end
+        end
+
+        def test_do_not_raise_when_int_is_not_wider_than_64bit
+          value = 9223372036854775807
+          assert_equal "9223372036854775807", @conn.quote(value)
+
+          value = -9223372036854775808
+          assert_equal "-9223372036854775808", @conn.quote(value)
+        end
+
+        def test_do_not_raise_when_raise_int_wider_than_64bit_is_false
+          ActiveRecord::Base.raise_int_wider_than_64bit = false
+          value = 9223372036854775807 + 1
+          assert_equal "9223372036854775808", @conn.quote(value)
+          ActiveRecord::Base.raise_int_wider_than_64bit = @raise_int_wider_than_64bit
         end
       end
     end
