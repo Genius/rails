@@ -19,5 +19,5 @@ Gem::Specification.new do |s|
   s.add_dependency 'activeresource',   "= #{RailsLts::VERSION::STRING}"
   s.add_dependency 'railties',         "= #{RailsLts::VERSION::STRING}"
   s.add_dependency 'railslts-version', "= #{RailsLts::VERSION::STRING}"
-  s.add_dependency 'rails2_ruby2',     "~> 1.0.3"
+  s.add_dependency 'rails2_ruby2',     github: 'Genius/rails2_ruby2', branch: '2-3-genius-lts'
 end
